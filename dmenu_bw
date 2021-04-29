@@ -65,16 +65,17 @@ template () {
     item="$(echo "$item" | jq -c ".name = \"<++>\"")"
     item="$(echo "$item" | jq -c ".notes = null")"
     case "$1" in
-        identity) item="$(echo "$item" | jq -c '.type = 1')" ;;
+        identity)   item="$(echo "$item" | jq -c '.type = 1')" ;;
         secureNote) item="$(echo "$item" | jq -c '.type = 2')" ;;
-        card) item="$(echo "$item" | jq -c '.type = 3')" ;;
-        login) item="$(echo "$item" | jq -c ".login.username = \"<++>\"")"
-            password=$(< /dev/urandom tr -dc 'A-Za-z0-9!@#$%^&*()-=_+[]~{}|;:,./<>?' | head -c 16)
-            item="$(echo "$item" | jq -c ".login.password = \"${password}\"")"
-            uri="$(bw get template item.login.uri)"
-            item="$(echo "$item" | jq -c ".login.uris = [${uri}]")"
-            item="$(echo "$item" | jq -c ".login.uris[0].uri = null")"
-            tmux set-buffer "$password" ;;
+        card)   item="$(echo "$item" | jq -c '.type = 3')" ;;
+        login)  item="$(echo "$item" | jq -c ".login.username = \"<++>\"")"
+                password=$(tr -dc 'A-Za-z0-9!@#$%^&*()-=_+[]~{}|;:,./<>?' \
+                    < /dev/urandom | head -c 16)
+                item="$(echo "$item" | jq -c ".login.password = \"${password}\"")"
+                uri="$(bw get template item.login.uri)"
+                item="$(echo "$item" | jq -c ".login.uris = [${uri}]")"
+                item="$(echo "$item" | jq -c ".login.uris[0].uri = null")"
+                tmux set-buffer "$password" ;;
         "") kill 0 ;;
         *) kill 0 ;;
     esac
