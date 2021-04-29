@@ -6,13 +6,6 @@ configFile="${configHome}/config"
 [ -z "$editCmd" ] &&
     editCmd="xterm -e $EDITOR"
 
-# debugging
-echo "$passwordFile"
-echo "$sessionKeyFile"
-echo "$editCmd"
-echo "$(basename ${0##/*/})"
-exit
-
 case $(bw status | jq -r '.status') in
     unlocked) : ;;
     *)  notify-send \
@@ -63,7 +56,9 @@ create_list () {
 }
 
 template () {
-    # $1 item type string, => item json
+    # generate item template
+    # $1: item type
+    # return: item json
     item="$(bw get template item)"
     template="$(bw get template item."$1")"
     item="$(echo "$item" | jq -c ".$1 = $template")"
@@ -87,7 +82,9 @@ template () {
 }
 
 edit () {
-    # $1 item json, => edited item json
+    # edit a vault item
+    # $1: item json
+    # returns: edited item json
 
     # create secure temporary files for editing vault items
     safe="$(mktemp -d /tmp/bw.XXXXX)"
@@ -113,14 +110,17 @@ edit () {
 }
 
 create_item () {
-    # $1 item json
+    # create a vault item
+    # $1: item json
     echo "$1" |
         bw encode |
         bw create item
 }
 
 edit_item () {
-    # $1 item json, $2 id
+    # edit a vault item
+    # $1: item json
+    # $2: id
     echo "$1" |
         bw encode |
         bw edit item "$2"
