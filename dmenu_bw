@@ -1,0 +1,153 @@
+#!/bin/sh
+
+configHome="${XDG_CONFIG_HOME}/dmenu_bw"
+configFile="${configHome}/config"
+. "$configFile"
+[ -z "$editCmd" ] &&
+    editCmd="xterm -e $EDITOR"
+
+# debugging
+echo "$passwordFile"
+echo "$sessionKeyFile"
+echo "$editCmd"
+echo "$(basename ${0##/*/})"
+exit
+
+case $(bw status | jq -r '.status') in
+    unlocked) : ;;
+    *)  notify-send \
+            "$(basename ${0##/*/})" \
+            "Session locked. Acquiring new session key."
+
+        password=$(yad \
+            --title="Bitwarden Password" \
+            --text="Bitwarden Password" \
+            --image="dialog-password" \
+            --entry \
+            --hide-text)
+        sessionKey=$(bw unlock $password --raw)
+
+        if [ -n "$sessionKeyFile" ]; then
+            printf 'export BW_SESSION="%s"' \
+                "$sessionKey" > "$sessionKeyFile"
+        fi
+
+        export BW_SESSION=$sessionKey
+        case $(bw status | jq -r '.status') in
+            unlocked) : ;;
+            *)  notify-send \
+                    "$(basename ${0##/*/})" \
+                    "Failed to unlock session."
+                exit 1 ;;
+        esac ;;
+esac
+
+main_list () {
+    echo "create"
+    echo "sync"
+    echo "================================================================================================================================================================================================================================================================================================================================================================================================================"
+    bw list items | jq -r '.[] | "\(.name) | \(.id)"'
+}
+
+item_list () {
+    echo "copy"
+    echo "edit"
+    echo "delete"
+}
+
+create_list () {
+    echo "card"
+    echo "identity"
+    echo "login"
+    echo "secure note"
+}
+
+template () {
+    # $1 item type string, => item json
+    item="$(bw get template item)"
+    template="$(bw get template item."$1")"
+    item="$(echo "$item" | jq -c ".$1 = $template")"
+    item="$(echo "$item" | jq -c ".name = \"<++>\"")"
+    item="$(echo "$item" | jq -c ".notes = null")"
+    case "$1" in
+        identity) item="$(echo "$item" | jq -c '.type = 1')" ;;
+        secureNote) item="$(echo "$item" | jq -c '.type = 2')" ;;
+        card) item="$(echo "$item" | jq -c '.type = 3')" ;;
+        login) item="$(echo "$item" | jq -c ".login.username = \"<++>\"")"
+            password=$(< /dev/urandom tr -dc 'A-Za-z0-9!@#$%^&*()-=_+[]~{}|;:,./<>?' | head -c 16)
+            item="$(echo "$item" | jq -c ".login.password = \"${password}\"")"
+            uri="$(bw get template item.login.uri)"
+            item="$(echo "$item" | jq -c ".login.uris = [${uri}]")"
+            item="$(echo "$item" | jq -c ".login.uris[0].uri = null")"
+            tmux set-buffer "$password" ;;
+        "") kill 0 ;;
+        *) kill 0 ;;
+    esac
+    echo "$item"
+}
+
+edit () {
+    # $1 item json, => edited item json
+
+    # create secure temporary files for editing vault items
+    safe="$(mktemp -d /tmp/bw.XXXXX)"
+    chmod 700 "$safe"
+    item="$(mktemp "${safe}/bw.XXXXX.json")"
+    chmod 600 "$item"
+    echo "$1" | jq > "$item"
+
+    # open item with text editor
+    $editCmd $item
+
+    # never accept invalid json
+    while ! cat "$item" | jq 1>/dev/null 2>&1; do
+        notify-send \
+            "$(basename ${0##/*/})" \
+            "Cannot parse invalid JSON."
+        $editCmd $item
+    done
+
+    # delete temporary files
+    cat "$item" | jq -c
+    rm -rf "$safe" 1>/dev/null 2>&1
+}
+
+create_item () {
+    # $1 item json
+    echo "$1" |
+        bw encode |
+        bw create item
+}
+
+edit_item () {
+    # $1 item json, $2 id
+    echo "$1" |
+        bw encode |
+        bw edit item "$2"
+}
+
+chosen=$(main_list | ${DMENU_CMD:-dmenu}); [ -n "$chosen" ] || exit 1
+case "$chosen" in
+    create) chosen=$(create_list | ${DMENU_CMD:-dmenu}); [ -n "$chosen" ] || exit 1
+        case "$chosen" in
+            card) create_item "$(edit "$(template card)")" ;;
+            identity) create_item "$(edit "$(template identity)")" ;;
+            login) create_item "$(edit "$(template login)")" ;;
+            "secure note") create_item "$(edit "$(template securenote)")" ;;
+        esac ;;
+    sync) : ;;
+    *) id=$(echo "$chosen" | cut -d '|' -f 2 | tr -d '[:space:]')
+        item=$(bw list items | jq -c ".[] | select(.id == \"$id\")")
+        chosen=$(item_list | ${DMENU_CMD:-dmenu}); [ -n "$chosen" ] || exit 1
+        case "$chosen" in
+            copy) username=$(echo "$item" | jq -r '.login.username')
+                password=$(echo "$item" | jq -r '.login.password')
+                echo "$username" | xclip -i -selection clipboard
+                echo "$password" | xclip -i -selection primary
+                tmux set-buffer "$username"
+                tmux set-buffer "$password" ;;
+            edit) edit_item "$(edit "$item")" $id ;;
+            delete) bw delete item $id ;;
+        esac ;;
+esac
+bw sync -f
