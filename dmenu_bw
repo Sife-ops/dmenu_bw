@@ -140,26 +140,26 @@ edit_item () {
 
 chosen=$(main_list | ${DMENU_CMD:-dmenu}); [ -n "$chosen" ] || exit 1
 case "$chosen" in
-    create) chosen=$(create_list | ${DMENU_CMD:-dmenu}); [ -n "$chosen" ] || exit 1
-        case "$chosen" in
-            card) create_item "$(edit "$(template card)")" ;;
-            identity) create_item "$(edit "$(template identity)")" ;;
-            login) create_item "$(edit "$(template login)")" ;;
-            "secure note") create_item "$(edit "$(template securenote)")" ;;
-        esac ;;
-    sync) : ;;
-    *) id=$(echo "$chosen" | cut -d '|' -f 2 | tr -d '[:space:]')
-        item=$(bw list items | jq -c ".[] | select(.id == \"$id\")")
-        chosen=$(item_list | ${DMENU_CMD:-dmenu}); [ -n "$chosen" ] || exit 1
-        case "$chosen" in
-            copy) username=$(echo "$item" | jq -r '.login.username')
-                password=$(echo "$item" | jq -r '.login.password')
-                echo "$username" | xclip -i -selection clipboard
-                echo "$password" | xclip -i -selection primary
-                tmux set-buffer "$username"
-                tmux set-buffer "$password" ;;
-            edit) edit_item "$(edit "$item")" $id ;;
-            delete) bw delete item $id ;;
-        esac ;;
+    create)     chosen=$(create_list | ${DMENU_CMD:-dmenu}); [ -n "$chosen" ] || exit 1
+                case "$chosen" in
+                    card)           create_item "$(edit "$(template card)")" ;;
+                    identity)       create_item "$(edit "$(template identity)")" ;;
+                    login)          create_item "$(edit "$(template login)")" ;;
+                    "secure note")  create_item "$(edit "$(template securenote)")" ;;
+                esac ;;
+    sync)       bw sync -f ;;
+    ${sepStr}*) exit 1 ;;
+    *)          id=$(echo "$chosen" | cut -d '|' -f 2 | tr -d '[:space:]')
+                item=$(bw list items | jq -c ".[] | select(.id == \"$id\")")
+                chosen=$(item_list | ${DMENU_CMD:-dmenu}); [ -n "$chosen" ] || exit 1
+                case "$chosen" in
+                    copy)   username=$(echo "$item" | jq -r '.login.username')
+                            password=$(echo "$item" | jq -r '.login.password')
+                            echo "$username" | xclip -i -selection clipboard
+                            echo "$password" | xclip -i -selection primary
+                            tmux set-buffer "$username"
+                            tmux set-buffer "$password" ;;
+                    delete) bw delete item $id ;;
+                    edit)   edit_item "$(edit "$item")" $id ;;
+                esac ;;
 esac
-bw sync -f
