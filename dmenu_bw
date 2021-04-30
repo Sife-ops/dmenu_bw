@@ -39,7 +39,7 @@ esac
 
 sep () {
     i=0
-    while [ $i -le 1000 ]; do
+    while [ $i -le 500 ]; do
         printf "%s" "$sepStr"
         i=$(( $i + 1 ))
     done
