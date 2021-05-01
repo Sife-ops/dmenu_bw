@@ -135,12 +135,24 @@ edit () {
     $editCmd $item
 
     # never accept invalid json
-    while ! cat "$item" | jq 1>/dev/null 2>&1; do
+    # Option A:
+    # Force user to submit valid JSON before movin on.
+    # while ! jq "." "$item" 1>/dev/null 2>&1; do
+    #     notify-send \
+    #         "$(basename ${0##/*/})" \
+    #         "Cannot parse invalid JSON."
+    #     eval "$editCmd $item"
+    # done
+
+    # Option B:
+    # Kill the program forcing the user to start over,
+    # giving the user the ability to quit if they want.
+    if ! jq "." "$item" 1>/dev/null 2>&1; then
         notify-send \
             "$(basename ${0##/*/})" \
             "Cannot parse invalid JSON."
-        $editCmd $item
-    done
+        kill 0
+    fi
 
     # delete temporary files
     cat "$item" | jq -c
