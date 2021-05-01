@@ -1,12 +1,20 @@
 #!/bin/sh
 
 configHome="${XDG_CONFIG_HOME}/dmenu_bw"
-configFile="${configHome}/config"
-. "$configFile"
-[ -z "$editCmd" ] &&
-    editCmd="xterm -e $EDITOR"
-[ -z "$sepStr" ] &&
+configFile="${configHome}/config.json"
+
+if [ -e "$configFile" ]; then
+    editCmd=$(jq -r ".editCmd" "$configFile")
+    sepStr=$(jq -r ".sepStr" "$configFile")
+    sessionKeyFile=$(jq -r ".sessionKeyFile" "$configFile")
+fi
+
+[ -z "$editCmd" ] || [ "$editCmd" = "null" ] &&
+    editCmd="xterm -e $VISUAL"
+[ -z "$sepStr" ] || [ "$sepStr" = "null" ] &&
     sepStr="="
+[ "$sessionKeyFile" = "null" ] &&
+    unset sessionKeyFile
 
 case $(bw status | jq -r '.status') in
     unlocked) : ;;
@@ -80,6 +88,7 @@ template () {
         secureNote) item="$(echo "$item" | jq -c '.type = 2')" ;;
         card)   item="$(echo "$item" | jq -c '.type = 3')" ;;
         login)  item="$(echo "$item" | jq -c ".login.username = \"<++>\"")"
+                # "fields": [ { "name": "Email", "value": "<++>", "type": 0 } ]
                 password=$(tr -dc 'A-Za-z0-9!@#$%^&*()-=_+[]~{}|;:,./<>?' \
                     < /dev/urandom | head -c 16)
                 item="$(echo "$item" | jq -c ".login.password = \"${password}\"")"
