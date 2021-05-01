@@ -185,7 +185,15 @@ case "$chosen" in
                     login)          create_item "$(edit "$(template login)")" ;;
                     "secure note")  create_item "$(edit "$(template securenote)")" ;;
                 esac ;;
-    sync)       bw sync -f ;;
+    sync)       if bw sync -f; then
+                    notify-send \
+                        "$(basename ${0##/*/})" \
+                        "Sync successful."
+                else
+                    notify-send \
+                        "$(basename ${0##/*/})" \
+                        "Sync failed."
+                fi ;;
     ${sepStr}*) exit 1 ;;
     *)          id=$(echo "$chosen" | cut -d '|' -f 2 | tr -d '[:space:]')
                 item=$(bw list items | jq -c ".[] | select(.id == \"$id\")")
