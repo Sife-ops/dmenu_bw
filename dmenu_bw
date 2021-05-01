@@ -33,7 +33,7 @@ case "$bwStatus" in
                                         sessionKey="$(bw login "$email" "$password" --raw)" ;;
                     locked)             notify-send \
                                             "$(basename ${0##/*/})" \
-                                            "Locked session. Acquiring new session key."
+                                            "Session locked. Acquiring new session key."
                                         password=$(yad \
                                             --title "Password" \
                                             --entry \
