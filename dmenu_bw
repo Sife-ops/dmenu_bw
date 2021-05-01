@@ -16,33 +16,50 @@ fi
 [ "$sessionKeyFile" = "null" ] &&
     unset sessionKeyFile
 
-case $(bw status | jq -r '.status') in
-    unlocked) : ;;
-    *)  notify-send \
-            "$(basename ${0##/*/})" \
-            "Session locked. Acquiring new session key."
+bwStatus=$(bw status | jq -r '.status')
+case "$bwStatus" in
+    unlocked)   : ;;
+    *)          case "$bwStatus" in
+                    unauthenticated)    notify-send \
+                                            "$(basename ${0##/*/})" \
+                                            "Unauthenticated session. Acquiring new session key."
+                                        email=$(yad \
+                                            --title "Email" \
+                                            --entry)
+                                        password=$(yad \
+                                            --title "Password" \
+                                            --entry \
+                                            --hide-text)
+                                        sessionKey="$(bw login "$email" "$password" --raw)" ;;
+                    locked)             notify-send \
+                                            "$(basename ${0##/*/})" \
+                                            "Locked session. Acquiring new session key."
+                                        password=$(yad \
+                                            --title "Password" \
+                                            --entry \
+                                            --hide-text)
+                                        sessionKey="$(bw unlock "$password" --raw)" ;;
+                    *)                  notify-send \
+                                            "$(basename ${0##/*/})" \
+                                            "Failed to unlock session."
+                                        kill 0 ;;
+                esac
 
-        password=$(yad \
-            --title="Bitwarden Password" \
-            --text="Bitwarden Password" \
-            --image="dialog-password" \
-            --entry \
-            --hide-text)
-        sessionKey=$(bw unlock $password --raw)
+                # output session key to file
+                if [ -n "$sessionKeyFile" ]; then
+                    printf 'export BW_SESSION="%s"' \
+                        "$sessionKey" > "$sessionKeyFile"
+                fi
 
-        if [ -n "$sessionKeyFile" ]; then
-            printf 'export BW_SESSION="%s"' \
-                "$sessionKey" > "$sessionKeyFile"
-        fi
-
-        export BW_SESSION=$sessionKey
-        case $(bw status | jq -r '.status') in
-            unlocked) : ;;
-            *)  notify-send \
-                    "$(basename ${0##/*/})" \
-                    "Failed to unlock session."
-                exit 1 ;;
-        esac ;;
+                # confirm login
+                export BW_SESSION=$sessionKey
+                case $(bw status | jq -r '.status') in
+                    unlocked)   : ;;
+                    *)          notify-send \
+                                    "$(basename ${0##/*/})" \
+                                    "Failed to unlock session."
+                                kill 0 ;;
+                esac ;;
 esac
 
 sep () {
