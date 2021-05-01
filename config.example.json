@@ -1,4 +1,4 @@
 {
     "sessionKeyFile":"${ZDOTDIR}/conf.d/99-bitwarden.zsh",
-    "editCmd":"st -e $EDITOR"
+    "editCmd":"st -e $VISUAL"
 }
