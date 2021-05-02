@@ -80,10 +80,10 @@ configuration](#Default-Configuration) is used.
     "copyCmds": {
         "login": {
             ".login.username": [
-                "echo \"$value\" | xclip -i selection clipboard"
+                "echo \"$value\" | xclip -i -selection clipboard"
             ],
             ".login.password": [
-                "echo \"$value\" | xclip -i selection primary"
+                "echo \"$value\" | xclip -i -selection primary"
             ]
         },
         "secure_note": {},
