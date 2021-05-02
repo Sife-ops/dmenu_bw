@@ -22,14 +22,15 @@ features:
 
 ## Usage
 
-Run dmenu\_bw.
-If you are not logged in it will ask for your username and password.
+Run dmenu\_bw. <br>
+If you are not logged in it will ask for your username and password. <br>
 
 If you are logged in, but your session is locked, it will ask for your
-password. See configuration/sessionKeyFile
+password. See [configuration/sessionKeyFile](#sessionKeyFile) <br>
 
 If login was successful or your session was already unlocked, it will show the
-main list of actions #create, #sync, and the list of vault items.
+main list of actions [create](#Creating-Vault-Items),
+[sync](#Syncing-Vault-Items), and the list of vault items. <br>
 
 * [Copying Passwords](#Copying-Passwords)
 * [Creating Vault Items](#Creating-Vault-Items)
@@ -38,76 +39,73 @@ main list of actions #create, #sync, and the list of vault items.
 * [Syncing Vault Items](#Syncing-Vault-Items)
 
 ### Copying Passwords
-select an item from the main list.
-select copy
-see [configuration/copyCmds](#copyCmds)
+Select an item from the main list and select *copy*. See
+[configuration/copyCmds](#copyCmds).
 
 ### Creating Vault Items
-select create from the main list.
-see [configuration/editCmd](#editCmd)
+Select *create* from the main list. See [configuration/editCmd](#editCmd).
 
 ### Editing Vault Items
-select an item from the main list.
-select edit
-see [configuration/editCmd](#editCmd)
+Select an item from the main list and select *edit*. See
+[configuration/editCmd](#editCmd).
 
 ### Deleting Vault Items
-select an item from the main list.
-select delete
+Select an item from the main list and select *delete*.
 
 ### Syncing Vault Items
-select sync from the main list.
+Select *sync* from the main list.
 
 
 ## Configuration
 
-dmenu\_run looks for ${XDG_CONFIG_HOME}/dmenu_run/config.json. An example
-config file is located in /usr/local/share/doc/config.example.json.
+dmenu\_run looks for ${XDG\_CONFIG\_HOME}/dmenu\_bw/config.json.
+If no configuration file is found, the [default
+configuration](#Default-Configuration) is used.
 
-- clipboardCmds
-- editCmd
-- sessionKeyFile
-- example config.json
+* [Default Configuration](#Default-Configuration)
+* [copyCmds](#copyCmds)
+* [editCmd](#editCmd)
+* [sessionKeyFile](#sessionKeyFile)
 
-- clipboardCmds
-    default:
-        "usernameCmds": [
-            "xclip -i selection clipboard"
-        ],
-        "passwordCmds": [
-            "xclip -i selection secondary"
-        ]
-Commands to run on the username and password strings. See example.
-Hint: use sxhkd to paste your secondary clipboard
-    mod4+v
-        sleep 0.25 &&
-        xdotool type --clearmodifiers "$(xclip -o -selection primary)"
+<!-- An example config file is located in
+/usr/local/share/doc/config.example.json. -->
 
-- editCmd
-    default: "xterm -e nano"
-The command to run when editing or creating vault items. See example.
-
-- sessionKeyFile
-    default: none
-The path of the file to output your BW_SESSION shell export whenever a new
-session key is generated. If you like this method of session persistence,
-simply set sessionKeyFile and source that file in your shell's rc. See example.
-
-- example config.json
-    {
-        "clipboardCmds": {
-            "usernameCmds": [
-                "xclip -i selection clipboard",
-                "tmux set-buffer"
+### Default Configuration
+```
+{
+    "copyCmds": {
+        "login": {
+            ".login.username": [
+                "xclip -i selection clipboard"
             ],
-            "passwordCmds": [
-                "xclip -i selection secondary",
-                "tmux set-buffer"
+            ".login.password": [
+                "xclip -i selection secondary"
             ]
         },
-        "editCmd":"st -e nvim",
-        "sessionKeyFile":"/home/foo/.config/zsh/conf.d/99-bitwarden.zsh",
-    }
+        "secure_note": {},
+        "card": {},
+        "identity": {}
+    },
+    "editCmd": "xterm -e nano",
+}
+```
+Hint: use sxhkd to paste your secondary clipboard
+```
+mod4+v
+    sleep 0.25 &&
+    xdotool type --clearmodifiers "$(xclip -o -selection primary)"
+```
+
+### copyCmds
+Commands to run on the username and password strings.
+
+### editCmd
+The command to run when editing or creating vault items.
+
+### sessionKeyFile
+The path of the file to output your BW\_SESSION shell export whenever a new
+session key is generated. If you like this method of session persistence,
+simply set sessionKeyFile and source that file in your shell's rc.
 
 ## Contributing
 Please share your comments (and commits) on how to make the program better.

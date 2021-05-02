@@ -4,17 +4,32 @@ configHome="${XDG_CONFIG_HOME}/dmenu_bw"
 configFile="${configHome}/config.json"
 
 if [ -e "$configFile" ]; then
+    copyCmds=$(jq -r ".copyCmds" "$configFile")
     editCmd=$(jq -r ".editCmd" "$configFile")
-    sepStr=$(jq -r ".sepStr" "$configFile")
-    sessionKeyFile=$(jq -r ".sessionKeyFile" "$configFile")
-fi
+    sessionKeyFile=$(jq -r ".sessionKeyFile" "$configFile"); fi
 
-[ -z "$editCmd" ] || [ "$editCmd" = "null" ] &&
-    editCmd="xterm -e $VISUAL"
-[ -z "$sepStr" ] || [ "$sepStr" = "null" ] &&
-    sepStr="="
-[ "$sessionKeyFile" = "null" ] &&
-    unset sessionKeyFile
+if [ -z "$copyCmds" ] || [ "$copyCmds" = "null" ]; then
+    copyCmds='
+    {
+        "login": {
+            ".login.username": [
+                "xclip -i selection clipboard"
+            ],
+            ".login.password": [
+                "xclip -i selection secondary"
+            ]
+        },
+        "secure_note": {},
+        "card": {},
+        "identity": {}
+    }'; fi
+if [ -z "$editCmd" ] || [ "$editCmd" = "null" ]; then
+    editCmd="xterm -e nano"; fi
+if [ "$sessionKeyFile" = "null" ]; then
+    unset sessionKeyFile; fi
+
+echo "$editCmd"
+kill 0
 
 bwStatus=$(bw status | jq -r '.status')
 case "$bwStatus" in
@@ -62,6 +77,7 @@ case "$bwStatus" in
                 esac ;;
 esac
 
+sepStr="="
 sep () {
     i=0
     while [ $i -le 500 ]; do
