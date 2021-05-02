@@ -56,7 +56,7 @@ Select an item from the main list and select *delete*.
 ### Syncing Vault Items
 Select *sync* from the main list.
 
-### Loggin Out
+### Logging Out
 Select *logout* from the main list.
 
 
