@@ -10,14 +10,20 @@ features:
     check: copy passwords!
     check: edit vault items!
     check: create vault items!
+    
+## Table of Contents
+* [Dependencies](#Dependencies)
+* [Usage](#Usage)
+* [Configuration](#Configuration)
+* [Contributing](#Contributing)
 
-# dependencies
+## Dependencies
 - bitwarden-cli (aur)
 - dmenu
 - yad
 - xclip
 
-# usage
+## Usage
 
 Run dmenu\_bw.
 If you are not logged in it will ask for your username and password.
@@ -52,7 +58,7 @@ select delete
 select sync from the main list.
 
 
-# configuration
+## Configuration
 
 dmenu\_run looks for ${XDG_CONFIG_HOME}/dmenu_run/config.json. An example
 config file is located in blah/config.example.json.
@@ -102,5 +108,5 @@ simply set sessionKeyFile and source that file in your shell's rc. See example.
         "sessionKeyFile":"/home/foo/.config/zsh/conf.d/99-bitwarden.zsh",
     }
 
-# contributing
+## Contributing
 Please share your comments (and commits) on how to make the program better.
