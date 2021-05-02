@@ -2,11 +2,8 @@
 
 A dmenu wrapper for bitwarden-cli written in POSIX shellscript.
 
-dmenu_bw is optimized rapidly copying, creating and editing passwords NO
-ELECTRON!!
-
 features:
-- [x] fast (no electron)
+- [x] fast (no electron)!
 - [x] copy passwords!
 - [x] edit vault items!
 - [x] create vault items!
@@ -18,10 +15,10 @@ features:
 * [Contributing](#Contributing)
 
 ## Dependencies
-- bitwarden-cli (aur)
-- dmenu
-- yad
-- xclip
+* bitwarden-cli (aur)
+* dmenu
+* yad
+* xclip
 
 ## Usage
 
@@ -30,31 +27,32 @@ If you are not logged in it will ask for your username and password.
 If you are logged in, but your session is locked, it will ask for your password. See configuration/sessionKeyFile
 If login was successful or your session was already unlocked, it will show the main list of actions #create, #sync, and the list of vault items.
 
+* [Copying Passwords](#Copying_Passwords)
 - copying passwords
 - creating vault items
 - editing vault items
 - deleting vault items
 - syncing vault items
 
-* copying passwords
+### Copying Passwords
 select an item from the main list.
 select copy
 see configuration/clipboardCmds
 
-* creating vault items
+### creating vault items
 select create from the main list.
 see configuration/editCmd
 
-* editing vault items
+### editing vault items
 select an item from the main list.
 select edit
 see configuration/editCmd
 
-* deleting vault items
+### deleting vault items
 select an item from the main list.
 select delete
 
-* syncing vault items
+### syncing vault items
 select sync from the main list.
 
 
