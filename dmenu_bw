@@ -13,10 +13,10 @@ if [ -z "$copyCmds" ] || [ "$copyCmds" = "null" ]; then
     {
         "login": {
             ".login.username": [
-                "xclip -i selection clipboard"
+                "echo \"$value\" | xclip -i selection clipboard"
             ],
             ".login.password": [
-                "xclip -i selection secondary"
+                "echo \"$value\" | xclip -i selection secondary"
             ]
         },
         "secure_note": {},
@@ -27,9 +27,6 @@ if [ -z "$editCmd" ] || [ "$editCmd" = "null" ]; then
     editCmd="xterm -e nano"; fi
 if [ "$sessionKeyFile" = "null" ]; then
     unset sessionKeyFile; fi
-
-echo "$editCmd"
-kill 0
 
 bwStatus=$(bw status | jq -r '.status')
 case "$bwStatus" in
@@ -213,14 +210,23 @@ case "$chosen" in
     ${sepStr}*) exit 1 ;;
     *)          id=$(echo "$chosen" | cut -d '|' -f 2 | tr -d '[:space:]')
                 item=$(bw list items | jq -c ".[] | select(.id == \"$id\")")
+                itemType=$(echo "$item" | jq -r ".type")
+                case "$itemType" in
+                    1) itemType="login" ;;
+                    2) itemType="secure_note" ;;
+                    3) itemType="card" ;;
+                    4) itemType="identity" ;;
+                esac
                 chosen=$(item_list | ${DMENU_CMD:-dmenu}); [ -n "$chosen" ] || exit 1
                 case "$chosen" in
-                    copy)   username=$(echo "$item" | jq -r '.login.username')
-                            password=$(echo "$item" | jq -r '.login.password')
-                            echo "$username" | xclip -i -selection clipboard
-                            echo "$password" | xclip -i -selection primary
-                            tmux set-buffer "$username"
-                            tmux set-buffer "$password" ;;
+                    copy)   keys=$(echo "$copyCmds" | jq -r ".${itemType} | keys[]")
+                            for key in $keys; do
+                                value=$(echo "$item" | jq -r "${key}")
+                                cmds=$(echo "$copyCmds" | jq -r ".${itemType}[\"${key}\"][]")
+                                for cmd in "$cmds"; do
+                                    eval "$cmd"
+                                done
+                            done ;;
                     delete) bw delete item $id ;;
                     edit)   edit_item "$(edit "$item")" $id ;;
                 esac ;;

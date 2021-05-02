@@ -23,7 +23,7 @@ features:
 ## Usage
 
 Run dmenu\_bw. <br>
-If you are not logged in it will ask for your username and password. <br>
+If you are not logged in, it will ask for your username and password. <br>
 
 If you are logged in, but your session is locked, it will ask for your
 password. See [configuration/sessionKeyFile](#sessionKeyFile) <br>
@@ -76,10 +76,10 @@ configuration](#Default-Configuration) is used.
     "copyCmds": {
         "login": {
             ".login.username": [
-                "xclip -i selection clipboard"
+                "echo \"$value\" | xclip -i selection clipboard"
             ],
             ".login.password": [
-                "xclip -i selection secondary"
+                "echo \"$value\" | xclip -i selection secondary"
             ]
         },
         "secure_note": {},
@@ -97,7 +97,7 @@ mod4+v
 ```
 
 ### copyCmds
-Commands to run on the username and password strings.
+Item properties to copy and commands to run on them.
 
 ### editCmd
 The command to run when editing or creating vault items.
