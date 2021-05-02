@@ -27,7 +27,7 @@ If you are not logged in it will ask for your username and password.
 If you are logged in, but your session is locked, it will ask for your password. See configuration/sessionKeyFile
 If login was successful or your session was already unlocked, it will show the main list of actions #create, #sync, and the list of vault items.
 
-* [Copying Passwords](#Copying Passwords)
+* [Copying Passwords](#Copying-Passwords)
 - copying passwords
 - creating vault items
 - editing vault items
