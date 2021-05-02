@@ -58,7 +58,7 @@ Select *sync* from the main list.
 
 ## Configuration
 
-dmenu\_run looks for ${XDG\_CONFIG\_HOME}/dmenu\_bw/config.json.
+dmenu\_bw looks for ${XDG\_CONFIG\_HOME}/dmenu\_bw/config.json.
 If no configuration file is found, the [default
 configuration](#Default-Configuration) is used.
 
