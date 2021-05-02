@@ -30,13 +30,14 @@ password. See [configuration/sessionKeyFile](#sessionKeyFile) <br>
 
 If login was successful or your session was already unlocked, it will show the
 main list of actions [create](#Creating-Vault-Items),
-[sync](#Syncing-Vault-Items), and the list of vault items. <br>
+[logout](#Logging-Out), [sync](#Syncing-Vault-Items), and the list of vault items. <br>
 
 * [Copying Passwords](#Copying-Passwords)
 * [Creating Vault Items](#Creating-Vault-Items)
 * [Editing Vault Items](#Editing-Vault-Items)
 * [Deleting Vault Items](#Deleting-Vault-Items)
 * [Syncing Vault Items](#Syncing-Vault-Items)
+* [Logging Out](#Logging-Out)
 
 ### Copying Passwords
 Select an item from the main list and select *copy*. See
@@ -54,6 +55,9 @@ Select an item from the main list and select *delete*.
 
 ### Syncing Vault Items
 Select *sync* from the main list.
+
+### Loggin Out
+Select *logout* from the main list.
 
 
 ## Configuration

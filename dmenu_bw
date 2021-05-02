@@ -86,9 +86,12 @@ sep () {
 
 main_list () {
     echo "create"
+    echo "logout"
     echo "sync"
     sep
     bw list items | jq -r '.[] | "\(.name) | \(.id)"'
+    # sep
+    # echo "run Bitwarden Electron"
 }
 
 item_list () {
@@ -118,7 +121,6 @@ template () {
         secureNote) item="$(echo "$item" | jq -c '.type = 2')" ;;
         card)   item="$(echo "$item" | jq -c '.type = 3')" ;;
         login)  item="$(echo "$item" | jq -c ".login.username = \"<++>\"")"
-                # "fields": [ { "name": "Email", "value": "<++>", "type": 0 } ]
                 password=$(tr -dc 'A-Za-z0-9!@#$%^&*()-=_+[]~{}|;:,./<>?' \
                     < /dev/urandom | head -c 16)
                 item="$(echo "$item" | jq -c ".login.password = \"${password}\"")"
@@ -198,6 +200,15 @@ case "$chosen" in
                     login)          create_item "$(edit "$(template login)")" ;;
                     "secure note")  create_item "$(edit "$(template securenote)")" ;;
                 esac ;;
+    logout)     if bw logout; then
+                    notify-send \
+                        "$(basename ${0##/*/})" \
+                        "Logout successful."
+                else
+                    notify-send \
+                        "$(basename ${0##/*/})" \
+                        "Logout failed."
+                fi ;;
     sync)       if bw sync -f; then
                     notify-send \
                         "$(basename ${0##/*/})" \
@@ -208,6 +219,7 @@ case "$chosen" in
                         "Sync failed."
                 fi ;;
     ${sepStr}*) exit 1 ;;
+    # "run Bitwarden Electron") bitwarden ;;
     *)          id=$(echo "$chosen" | cut -d '|' -f 2 | tr -d '[:space:]')
                 item=$(bw list items | jq -c ".[] | select(.id == \"$id\")")
                 itemType=$(echo "$item" | jq -r ".type")
