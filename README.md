@@ -6,11 +6,11 @@ dmenu_bw is optimized rapidly copying, creating and editing passwords NO
 ELECTRON!!
 
 features:
-    check: fast (no electron)
-    check: copy passwords!
-    check: edit vault items!
-    check: create vault items!
-    
+- [x] fast (no electron)
+- [x] copy passwords!
+- [x] edit vault items!
+- [x] create vault items!
+
 ## Table of Contents
 * [Dependencies](#Dependencies)
 * [Usage](#Usage)
