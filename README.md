@@ -28,31 +28,30 @@ If you are logged in, but your session is locked, it will ask for your password.
 If login was successful or your session was already unlocked, it will show the main list of actions #create, #sync, and the list of vault items.
 
 * [Copying Passwords](#Copying-Passwords)
-- copying passwords
-- creating vault items
-- editing vault items
-- deleting vault items
-- syncing vault items
+* [Creating Vault Items](#Creating-Vault-Items)
+* [Editing Vault Items](#Editing-Vault-Items)
+* [Deleting Vault Items](#Deleting-Vault-Items)
+* [Syncing Vault Items](#Syncing-Vault-Items)
 
 ### Copying Passwords
 select an item from the main list.
 select copy
 see configuration/clipboardCmds
 
-### creating vault items
+### Creating Vault Items
 select create from the main list.
 see configuration/editCmd
 
-### editing vault items
+### Editing Vault Items
 select an item from the main list.
 select edit
 see configuration/editCmd
 
-### deleting vault items
+### Deleting Vault Items
 select an item from the main list.
 select delete
 
-### syncing vault items
+### Syncing Vault Items
 select sync from the main list.
 
 
