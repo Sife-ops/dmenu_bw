@@ -1,4 +1,41 @@
 {
-    "sessionKeyFile":"${ZDOTDIR}/conf.d/99-bitwarden.zsh",
-    "editCmd":"st -e $VISUAL"
+
+    "copyCmds": {
+
+        "login": {
+            ".login.username": [
+                "xclip -i selection clipboard",
+                "tmux set-buffer"
+            ],
+            ".login.password": [
+                "xclip -i selection secondary",
+                "tmux set-buffer"
+            ]
+        },
+
+        "secure_note": {
+            "property1": [
+                "commands1",
+                "command2"
+            ],
+            "property2": [
+                "commands1",
+                "command2"
+            ]
+        },
+
+        "card": {
+            "property": []
+        },
+
+        "identity": {
+            "property": ["commands"]
+        }
+
+    },
+
+    "editCmd":"st -e nvim",
+    "sessionKeyFile":"/home/wyatt/.config/zsh/conf.d/99-bitwarden.zsh",
+    "sepStr":"="
+
 }

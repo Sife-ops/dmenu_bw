@@ -24,8 +24,12 @@ features:
 
 Run dmenu\_bw.
 If you are not logged in it will ask for your username and password.
-If you are logged in, but your session is locked, it will ask for your password. See configuration/sessionKeyFile
-If login was successful or your session was already unlocked, it will show the main list of actions #create, #sync, and the list of vault items.
+
+If you are logged in, but your session is locked, it will ask for your
+password. See configuration/sessionKeyFile
+
+If login was successful or your session was already unlocked, it will show the
+main list of actions #create, #sync, and the list of vault items.
 
 * [Copying Passwords](#Copying-Passwords)
 * [Creating Vault Items](#Creating-Vault-Items)
@@ -36,16 +40,16 @@ If login was successful or your session was already unlocked, it will show the m
 ### Copying Passwords
 select an item from the main list.
 select copy
-see configuration/clipboardCmds
+see [configuration/copyCmds](#copyCmds)
 
 ### Creating Vault Items
 select create from the main list.
-see configuration/editCmd
+see [configuration/editCmd](#editCmd)
 
 ### Editing Vault Items
 select an item from the main list.
 select edit
-see configuration/editCmd
+see [configuration/editCmd](#editCmd)
 
 ### Deleting Vault Items
 select an item from the main list.
@@ -58,7 +62,7 @@ select sync from the main list.
 ## Configuration
 
 dmenu\_run looks for ${XDG_CONFIG_HOME}/dmenu_run/config.json. An example
-config file is located in blah/config.example.json.
+config file is located in /usr/local/share/doc/config.example.json.
 
 - clipboardCmds
 - editCmd
