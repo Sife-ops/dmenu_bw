@@ -83,7 +83,7 @@ configuration](#Default-Configuration) is used.
                 "echo \"$value\" | xclip -i selection clipboard"
             ],
             ".login.password": [
-                "echo \"$value\" | xclip -i selection secondary"
+                "echo \"$value\" | xclip -i selection primary"
             ]
         },
         "secure_note": {},
@@ -93,7 +93,7 @@ configuration](#Default-Configuration) is used.
     "editCmd": "xterm -e nano",
 }
 ```
-Hint: use sxhkd to paste your secondary clipboard
+Hint: use sxhkd to paste your primary clipboard
 ```
 mod4+v
     sleep 0.25 &&

@@ -16,7 +16,7 @@ if [ -z "$copyCmds" ] || [ "$copyCmds" = "null" ]; then
                 "echo \"$value\" | xclip -i selection clipboard"
             ],
             ".login.password": [
-                "echo \"$value\" | xclip -i selection secondary"
+                "echo \"$value\" | xclip -i selection primary"
             ]
         },
         "secure_note": {},
