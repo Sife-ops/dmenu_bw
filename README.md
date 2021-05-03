@@ -1,5 +1,7 @@
 # dmenu\_bw
 
+![dmenu\_bw](https://imgur.com/a/VigOLAs)
+
 A dmenu wrapper for bitwarden-cli written in POSIX shellscript.
 
 features:
@@ -101,15 +103,48 @@ mod4+v
 ```
 
 ### copyCmds
-Item properties to copy and commands to run on them.
+Contains objects for each of the bitwarden item types.
+Each object contains an array named after the property of said item.
+The array contains commands to be evaluated where *$value* is the
+value of the property of said item. <br>
+
+e.g. copy usernames and passwords to the clipboard and tmux:
+```
+"login": {
+    ".login.username": [
+        "echo \"$value\" | xclip -i -selection clipboard",
+        "tmux set-buffer \"$value\""
+    ],
+    ".login.password": [
+        "echo \"$value\" | xclip -i -selection primary",
+        "tmux set-buffer \"$value\""
+    ]
+}
+```
+e.g. output identities to a file:
+```
+"identity": {
+    ".": [
+        "echo \"$value\" > /tmp/bar"
+    ]
+}
+```
 
 ### editCmd
-The command to run when editing or creating vault items.
+The command to run when editing or creating vault items.<br>
+
+e.g. open files with in st with nvim
+```
+"editCmd": "st -e nvim"
+```
 
 ### sessionKeyFile
 The path of the file to output your BW\_SESSION shell export whenever a new
 session key is generated. If you like this method of session persistence,
 simply set sessionKeyFile and source that file in your shell's rc.
+```
+"sessionKeyFile": "/home/foo/.config/zsh/conf.d/99-bitwarden.zsh"
+```
 
 ## Contributing
 Please share your comments (and commits) on how to make the program better.

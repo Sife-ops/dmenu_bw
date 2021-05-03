@@ -191,9 +191,9 @@ edit_item () {
         bw edit item "$2"
 }
 
-chosen=$(main_list | ${DMENU_CMD:-dmenu}); [ -n "$chosen" ] || exit 1
+chosen=$(main_list | ${DMENU_CMD:-dmenu -i -l 10}); [ -n "$chosen" ] || exit 1
 case "$chosen" in
-    create)     chosen=$(create_list | ${DMENU_CMD:-dmenu}); [ -n "$chosen" ] || exit 1
+    create)     chosen=$(create_list | ${DMENU_CMD:-dmenu -i -l 10}); [ -n "$chosen" ] || exit 1
                 case "$chosen" in
                     card)           create_item "$(edit "$(template card)")" ;;
                     identity)       create_item "$(edit "$(template identity)")" ;;
@@ -229,7 +229,7 @@ case "$chosen" in
                     3) itemType="card" ;;
                     4) itemType="identity" ;;
                 esac
-                chosen=$(item_list | ${DMENU_CMD:-dmenu}); [ -n "$chosen" ] || exit 1
+                chosen=$(item_list | ${DMENU_CMD:-dmenu -i -l 10}); [ -n "$chosen" ] || exit 1
                 case "$chosen" in
                     copy)   keys=$(echo "$copyCmds" | jq -r ".${itemType} | keys[]")
                             for key in $keys; do
