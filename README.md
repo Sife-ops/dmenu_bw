@@ -1,6 +1,6 @@
 # dmenu\_bw
 
-![dmenu\_bw](https://imgur.com/a/VigOLAs)
+![imgur](https://imgur.com/a/VigOLAs.gif)
 
 A dmenu wrapper for bitwarden-cli written in POSIX shellscript.
 
