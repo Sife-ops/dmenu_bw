@@ -31,47 +31,49 @@ if [ "$sessionKeyFile" = "null" ]; then
 bwStatus=$(bw status | jq -r '.status')
 case "$bwStatus" in
     unlocked)   : ;;
-    *)          case "$bwStatus" in
-                    unauthenticated)    notify-send \
-                                            "$(basename ${0##/*/})" \
-                                            "Unauthenticated session. Acquiring new session key."
-                                        email=$(yad \
-                                            --title "Email" \
-                                            --entry)
-                                        password=$(yad \
-                                            --title "Password" \
-                                            --entry \
-                                            --hide-text)
-                                        sessionKey="$(bw login "$email" "$password" --raw)" ;;
-                    locked)             notify-send \
-                                            "$(basename ${0##/*/})" \
-                                            "Session locked. Acquiring new session key."
-                                        password=$(yad \
-                                            --title "Password" \
-                                            --entry \
-                                            --hide-text)
-                                        sessionKey="$(bw unlock "$password" --raw)" ;;
-                    *)                  notify-send \
-                                            "$(basename ${0##/*/})" \
-                                            "Failed to unlock session."
-                                        kill 0 ;;
-                esac
+    *)  case "$bwStatus" in
+            unauthenticated)
+                notify-send \
+                    "$(basename ${0##/*/})" \
+                    "Unauthenticated session. Acquiring new session key."
+                email=$(yad \
+                    --title "Email" \
+                    --entry)
+                password=$(yad \
+                    --title "Password" \
+                    --entry \
+                    --hide-text)
+                sessionKey="$(bw login "$email" "$password" --raw)" ;;
+            locked)
+                notify-send \
+                    "$(basename ${0##/*/})" \
+                    "Session locked. Acquiring new session key."
+                password=$(yad \
+                    --title "Password" \
+                    --entry \
+                    --hide-text)
+                sessionKey="$(bw unlock "$password" --raw)" ;;
+            *)  notify-send \
+                    "$(basename ${0##/*/})" \
+                    "Failed to unlock session."
+                kill 0 ;;
+        esac
 
-                # output session key to file
-                if [ -n "$sessionKeyFile" ]; then
-                    printf 'export BW_SESSION="%s"' \
-                        "$sessionKey" > "$sessionKeyFile"
-                fi
+        # output session key to file
+        if [ -n "$sessionKeyFile" ]; then
+            printf 'export BW_SESSION="%s"' \
+                "$sessionKey" > "$sessionKeyFile"
+        fi
 
-                # confirm login
-                export BW_SESSION=$sessionKey
-                case $(bw status | jq -r '.status') in
-                    unlocked)   : ;;
-                    *)          notify-send \
-                                    "$(basename ${0##/*/})" \
-                                    "Failed to unlock session."
-                                kill 0 ;;
-                esac ;;
+        # confirm login
+        export BW_SESSION=$sessionKey
+        case $(bw status | jq -r '.status') in
+            unlocked) : ;;
+            *)  notify-send \
+                    "$(basename ${0##/*/})" \
+                    "Failed to unlock session."
+                kill 0 ;;
+        esac ;;
 esac
 
 sepStr="="
@@ -193,6 +195,7 @@ edit_item () {
 
 chosen=$(main_list | ${DMENU_CMD:-dmenu -i -l 10}); [ -n "$chosen" ] || exit 1
 case "$chosen" in
+    ${sepStr}*) exit 1 ;;
     create)     chosen=$(create_list | ${DMENU_CMD:-dmenu -i -l 10}); [ -n "$chosen" ] || exit 1
                 case "$chosen" in
                     card)           create_item "$(edit "$(template card)")" ;;
@@ -218,8 +221,6 @@ case "$chosen" in
                         "$(basename ${0##/*/})" \
                         "Sync failed."
                 fi ;;
-    ${sepStr}*) exit 1 ;;
-    # "run Bitwarden Electron") bitwarden ;;
     *)          id=$(echo "$chosen" | cut -d '|' -f 2 | tr -d '[:space:]')
                 item=$(bw list items | jq -c ".[] | select(.id == \"$id\")")
                 itemType=$(echo "$item" | jq -r ".type")
