@@ -4,11 +4,11 @@
 
 A dmenu wrapper for bitwarden-cli written in POSIX shellscript.
 
-features:
-- [x] fast (no electron)!
-- [x] copy passwords!
-- [x] edit vault items!
-- [x] create vault items!
+Features:
+- [x] Fast (no electron)!
+- [x] Copy passwords!
+- [x] Edit vault items!
+- [x] Create vault items!
 
 ## Table of Contents
 * [Dependencies](#Dependencies)
