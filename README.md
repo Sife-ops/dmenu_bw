@@ -23,7 +23,7 @@ Features:
 * xclip
 
 ## Usage
-Run dmenu\_bw. <br>
+Run `dmenu_bw`. <br>
 
 If you are not logged in, it will ask for your username and password. <br>
 
@@ -43,31 +43,31 @@ vault items. <br>
 * [Logging Out](#Logging-Out)
 
 ### Copying Passwords
-Select an item from the main list and select *copy*. See
+Select an item from the main list and select `copy`. See
 [configuration/copyCmds](#copyCmds).
 
 ### Creating Vault Items
-Select *create* from the main list. See [configuration/editCmd](#editCmd).
+Select `create` from the main list. See [configuration/editCmd](#editCmd).
 
 ### Editing Vault Items
-Select an item from the main list and select *edit*. See
+Select an item from the main list and select `edit`. See
 [configuration/editCmd](#editCmd).
 
 ### Deleting Vault Items
-Select an item from the main list and select *delete*.
+Select an item from the main list and select `delete`.
 
 ### Syncing Vault Items
-Select *sync* from the main list.
+Select `sync` from the main list.
 
 ### Logging Out
-Select *logout* from the main list.
+Select `logout` from the main list.
 
 
 ## Configuration
 
-dmenu\_bw looks for ${XDG\_CONFIG\_HOME}/dmenu\_bw/config.json.
-If no configuration file is found, the [default
-configuration](#Default-Configuration) is used.
+dmenu\_bw looks for `${XDG_CONFIG_HOME}/dmenu_bw/config.json`.  If no
+file is found, the [default configuration](#Default-Configuration) is
+used.
 
 * [Default Configuration](#Default-Configuration)
 * [copyCmds](#copyCmds)
@@ -108,7 +108,7 @@ mod4+v
 ### copyCmds
 Contains objects for each of the bitwarden item types.
 Each object contains an array named after the property of said item.
-The array contains commands to be evaluated where *$value* is the
+The array contains commands to be evaluated where `$value` is the
 value of the property of said item. <br>
 
 e.g. copy usernames and passwords to the clipboard and tmux:
@@ -147,9 +147,10 @@ e.g. edit items with st and nvim
 ```
 
 ### sessionKeyFile
-The path of the file to output your BW\_SESSION shell export whenever a new
-session key is generated. If you like this method of session persistence,
-simply set sessionKeyFile and source that file in your shell's rc.
+The path of the file to output your `BW_SESSION` shell export whenever
+a new session key is generated. If you like this method of session
+persistence, simply set sessionKeyFile and source that file in your
+shell's rc.
 ```javascript
 "sessionKeyFile": "/home/foo/.config/zsh/conf.d/99-bitwarden.zsh"
 ```
