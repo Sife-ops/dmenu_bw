@@ -25,14 +25,16 @@ Features:
 ## Usage
 
 Run dmenu\_bw. <br>
+
 If you are not logged in, it will ask for your username and password. <br>
 
 If you are logged in, but your session is locked, it will ask for your
 password. See [configuration/sessionKeyFile](#sessionKeyFile) <br>
 
-If login was successful or your session was already unlocked, it will show the
-main list of actions [create](#Creating-Vault-Items),
-[logout](#Logging-Out), [sync](#Syncing-Vault-Items), and the list of vault items. <br>
+If login was successful or your session was already unlocked, it will
+show the main list of actions [create](#Creating-Vault-Items),
+[logout](#Logging-Out), [sync](#Syncing-Vault-Items), and the list of
+vault items. <br>
 
 * [Copying Passwords](#Copying-Passwords)
 * [Creating Vault Items](#Creating-Vault-Items)
@@ -78,7 +80,7 @@ configuration](#Default-Configuration) is used.
 /usr/local/share/doc/config.example.json. -->
 
 ### Default Configuration
-```
+```javascript
 {
     "copyCmds": {
         "login": {
@@ -111,7 +113,7 @@ The array contains commands to be evaluated where *$value* is the
 value of the property of said item. <br>
 
 e.g. copy usernames and passwords to the clipboard and tmux:
-```
+```javascript
 "login": {
     ".login.username": [
         "echo \"$value\" | xclip -i -selection clipboard",
@@ -124,7 +126,7 @@ e.g. copy usernames and passwords to the clipboard and tmux:
 }
 ```
 e.g. output identities to a file:
-```
+```javascript
 "identity": {
     ".": [
         "echo \"$value\" > /tmp/bar"
@@ -136,10 +138,13 @@ e.g. output identities to a file:
 Options to pass to the dmenu command.
 
 ### editCmd
-The command to run when editing or creating vault items.<br>
+
+Editing vault items with yad is not yet supported. Vault items can be
+changed by passing the JSON file for your bitwarden vault item to your
+editor command.
 
 e.g. open files with in st with nvim
-```
+```javascript
 "editCmd": "st -e nvim"
 ```
 
@@ -147,7 +152,7 @@ e.g. open files with in st with nvim
 The path of the file to output your BW\_SESSION shell export whenever a new
 session key is generated. If you like this method of session persistence,
 simply set sessionKeyFile and source that file in your shell's rc.
-```
+```javascript
 "sessionKeyFile": "/home/foo/.config/zsh/conf.d/99-bitwarden.zsh"
 ```
 
