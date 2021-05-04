@@ -20,7 +20,7 @@ if [ -z "$copyCmds" ] || [ "$copyCmds" = "null" ]; then
                 "echo \"$value\" | xclip -i -selection primary"
             ]
         },
-        "secure_note": {},
+        "securenote": {},
         "card": {},
         "identity": {}
     }'; fi
@@ -106,10 +106,10 @@ item_list () {
 }
 
 create_list () {
-    echo "card"
-    echo "identity"
     echo "login"
     echo "secure note"
+    echo "card"
+    echo "identity"
 }
 
 edit () {
@@ -155,8 +155,8 @@ create () {
             item="$(echo "$item" | jq -c ".login.uris = [${uri}]")"
 
             form="$(yad --form \
-                --field=$"Name" "aaa" \
-                --field=$"Username" "bbb" \
+                --field=$"Name" "" \
+                --field=$"Username" "" \
                 --field=$"Password":H "" \
                 --field=$"URI" "" \
                 --field=$"Folder" "" \
@@ -199,15 +199,81 @@ create () {
                 item="$(echo "$item" | jq -c ".notes = null")" ||
                 item="$(echo "$item" | jq -c ".notes = \"$notes\"")"
             ;; #$
+
+        securenote)
+            item="$(echo "$item" | jq -c '.type = 2')"
+
+            form="$(yad --form \
+                --field=$"Name" "" \
+                --field=$"Folder" "" \
+                --field=$"Favorite":CHK "false" \
+                --field=$"Notes":TXT "" \
+                --separator="$formSep" || kill 0)"
+
+            kill 0
+
+            ;;
+
+        card)
+            item="$(echo "$item" | jq -c '.type = 3')"
+
+            form="$(yad --form \
+                --field=$"Name" "" \
+                --field=$"Cardholder Name" "" \
+                --field=$"Number":H "" \
+                --field=$"Brand":CBE "Visa!Mastercard!American Express" \
+                --field=$"Expiration Date":DT \
+                --field=$"Security Code":H "" \
+                --field=$"Folder" "" \
+                --field=$"Favorite":CHK "false" \
+                --field=$"Notes":TXT "" \
+                --separator="$formSep" || kill 0)"
+
+            kill 0
+
+            ;;
+
+        identity)
+            item="$(echo "$item" | jq -c '.type = 4')"
+
+            form="$(yad --form \
+                --field=$"Name" "" \
+                --field=$"Title":CB "Mr!Mrs!Ms!Dr" \
+                --field=$"First Name" "" \
+                --field=$"Middle Name" "" \
+                --field=$"Last Name" "" \
+                --field=$"Username" "" \
+                --field=$"Company" "" \
+                --field=$"Social Security Number" "" \
+                --field=$"Passport Number" "" \
+                --field=$"License Number" "" \
+                --field=$"Email" "" \
+                --field=$"Address 1" "" \
+                --field=$"Address 2" "" \
+                --field=$"Address 3" "" \
+                --field=$"City/Town" "" \
+                --field=$"State/Province" "" \
+                --field=$"Zip/Postal Code" "" \
+                --field=$"Country" "" \
+                --field=$"Favorite":CHK "false" \
+                --field=$"Folder" "" \
+                --field=$"Notes":TXT "" \
+                --separator="$formSep" || kill 0)"
+
+            kill 0
+
+            ;;
+
         *) kill 0 ;;
-        # card) : ;;
-        # identity) : ;;
-        # secure_note) : ;;
+
     esac
 
-    echo "$item" |
-        bw encode |
-        bw create item
+    echo "$item"
+
+    # echo "$item" |
+    #     bw encode |
+    #     bw create item
+
 }
 
 edit_item () {
@@ -223,10 +289,10 @@ chosen=$(main_list | dmenu ${dmenuOpts}); [ -n "$chosen" ] || exit 1
 case "$chosen" in
     create)     chosen=$(create_list | dmenu ${dmenuOpts}); [ -n "$chosen" ] || exit 1
                 case "$chosen" in
+                    login)          create login ;;
+                    "secure note")  create securenote ;;
                     card)           create card ;;
                     identity)       create identity ;;
-                    login)          create login ;;
-                    "secure note")  create secure_note ;;
                 esac ;;
     logout)     if bw logout; then
                     notify-send \
@@ -253,7 +319,7 @@ case "$chosen" in
                 itemType=$(echo "$item" | jq -r ".type")
                 case "$itemType" in
                     1) itemType="login" ;;
-                    2) itemType="secure_note" ;;
+                    2) itemType="securenote" ;;
                     3) itemType="card" ;;
                     4) itemType="identity" ;;
                 esac

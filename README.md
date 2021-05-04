@@ -89,7 +89,7 @@ configuration](#Default-Configuration) is used.
                 "echo \"$value\" | xclip -i -selection primary"
             ]
         },
-        "secure_note": {},
+        "securenote": {},
         "card": {},
         "identity": {}
     },
