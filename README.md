@@ -2,13 +2,13 @@
 
 ![giphy](https://media.giphy.com/media/iEJ7HRPdOpWUrNy3Ue/giphy.gif)
 
-A dmenu wrapper for bitwarden-cli written in POSIX shellscript.
+A minimal Bitwarden GUI written in POSIX shellscript.
 
 Features:
 - [x] Fast (no electron)!
 - [x] Copy passwords!
-- [x] Edit vault items!
 - [x] Create vault items!
+- [x] Edit vault items!
 
 ## Table of Contents
 * [Dependencies](#Dependencies)
