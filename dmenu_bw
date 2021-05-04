@@ -119,13 +119,14 @@ template () {
     item="$(bw get template item)"
     template="$(bw get template item."$1")"
     item="$(echo "$item" | jq -c ".$1 = $template")"
-    item="$(echo "$item" | jq -c ".name = \"<++>\"")"
-    item="$(echo "$item" | jq -c ".notes = null")"
+    # item="$(echo "$item" | jq -c ".name = null")"
+    # item="$(echo "$item" | jq -c ".notes = null")"
     case "$1" in
         identity)   item="$(echo "$item" | jq -c '.type = 1')" ;;
         secureNote) item="$(echo "$item" | jq -c '.type = 2')" ;;
         card)   item="$(echo "$item" | jq -c '.type = 3')" ;;
-        login)  item="$(echo "$item" | jq -c ".login.username = \"<++>\"")"
+        login)
+                # item="$(echo "$item" | jq -c ".login.username = null")"
                 password=$(tr -dc 'A-Za-z0-9!@#$%^&*()-=_+[]~{}|;:,./<>?' \
                     < /dev/urandom | head -c 16)
                 item="$(echo "$item" | jq -c ".login.password = \"${password}\"")"
@@ -138,6 +139,65 @@ template () {
     esac
     echo "$item"
 }
+
+newItem="$(bw get template item)"
+
+template="$(bw get template item.login)"
+newItem="$(echo "$newItem" | jq -c ".login = $template")"
+uri="$(bw get template item.login.uri)"
+newItem="$(echo "$newItem" | jq -c ".login.uris = [${uri}]")"
+
+echo "$newItem"
+
+formSep=$RANDOM
+form="$(yad --form \
+    --field=$"Name" "aaa" \
+    --field=$"Username" "bbb" \
+    --field=$"Password":H "" \
+    --field=$"URI" "" \
+    --field=$"Folder" "" \
+    --field=$"Favorite":CHK "false" \
+    --field=$"Notes":TXT "" \
+    --separator="$formSep")"
+
+name="$(echo "$form" | awk -F "$formSep" '{print $1}')"
+[ "$name" = "" ] &&
+    newItem="$(echo "$newItem" | jq -c ".name = null")" ||
+    newItem="$(echo "$newItem" | jq -c ".name = \"$name\"")"
+
+username="$(echo "$form" | awk -F "$formSep" '{print $2}')"
+[ "$username" = "" ] &&
+    newItem="$(echo "$newItem" | jq -c ".login.username = null")" ||
+    newItem="$(echo "$newItem" | jq -c ".login.username = \"$username\"")"
+
+password="$(echo "$form" | awk -F "$formSep" '{print $3}')"
+[ "$password" = "" ] &&
+    newItem="$(echo "$newItem" | jq -c ".login.password = null")" ||
+    newItem="$(echo "$newItem" | jq -c ".login.password = \"$password\"")"
+
+uri="$(echo "$form" | awk -F "$formSep" '{print $4}')"
+[ "$uri" = "" ] &&
+    newItem="$(echo "$newItem" | jq -c ".login.uris[0].uri = null")" ||
+    newItem="$(echo "$newItem" | jq -c ".login.uris[0].uri = \"$uri\"")"
+
+folderId="$(echo "$form" | awk -F "$formSep" '{print $5}')"
+[ "$folderId" = "" ] &&
+    newItem="$(echo "$newItem" | jq -c ".folderId = null")" ||
+    newItem="$(echo "$newItem" | jq -c ".folderId = \"$folderId\"")"
+
+favorite="$(echo "$form" | awk -F "$formSep" '{print $6}')"
+[ "$favorite" = "TRUE" ] &&
+    newItem="$(echo "$newItem" | jq -c ".favorite = true")" ||
+    newItem="$(echo "$newItem" | jq -c ".favorite = false")"
+
+notes="$(echo "$form" | awk -F "$formSep" '{print $7}')"
+[ "$notes" = "" ] &&
+    newItem="$(echo "$newItem" | jq -c ".notes = null")" ||
+    newItem="$(echo "$newItem" | jq -c ".notes = \"$notes\"")"
+
+echo "========================="
+echo "$newItem"
+exit
 
 edit () {
     # edit a vault item
