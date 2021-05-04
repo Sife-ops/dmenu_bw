@@ -141,7 +141,7 @@ Editing vault items with yad is not yet supported. Vault items can be
 edited by passing the JSON file for your bitwarden vault item to your
 editor command.
 
-e.g. open files in st with nvim
+e.g. edit items with st and nvim
 ```javascript
 "editCmd": "st -e nvim"
 ```
