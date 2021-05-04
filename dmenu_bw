@@ -31,9 +31,6 @@ if [ -z "$editCmd" ] || [ "$editCmd" = "null" ]; then
 if [ "$sessionKeyFile" = "null" ]; then
     unset sessionKeyFile; fi
 
-# echo "$dmenuOpts"
-# exit
-
 bwStatus=$(bw status | jq -r '.status')
 case "$bwStatus" in
     unlocked)   : ;;
