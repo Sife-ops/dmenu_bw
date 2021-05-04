@@ -248,7 +248,9 @@ create () {
 
     echo "$item" |
         bw encode |
-        bw create item
+        bw create item &&
+            notify-send "$(basename ${0##/*/})" "Creation successful." ||
+            notify-send "$(basename ${0##/*/})" "Creation failed."
 }
 
 edit_item () {
@@ -308,7 +310,15 @@ case "$chosen" in
                                     eval "$cmd"
                                 done
                             done ;;
-                    delete) bw delete item $id ;;
+                    delete) if bw delete item $id; then
+                                notify-send \
+                                    "$(basename ${0##/*/})" \
+                                    "Deletion successful."
+                            else
+                                notify-send \
+                                    "$(basename ${0##/*/})" \
+                                    "Deletion failed."
+                            fi ;;
                     edit)   edit_item "$(edit "$item")" $id ;;
                 esac ;;
 esac
