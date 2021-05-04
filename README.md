@@ -2,10 +2,16 @@
 
 ![giphy](https://media.giphy.com/media/iEJ7HRPdOpWUrNy3Ue/giphy.gif)
 
-A minimal Bitwarden GUI written in POSIX shellscript.
+A minimal Bitwarden GUI written in POSIX shellscript. <br>
+
+I created dmenu\_bw as a hotkeyed password manager for minimal window manager
+desktop sessions. It is highly inspired by the *workflow* of tiling window
+managers, and allows for the rapid lookup, creation, and editing of Bitwarden
+vault items. The goal of dmenu\_bw is to provide the same capabilities as the
+official Bitwarden client but without the Electron dependency. <br>
 
 Features:
-- [x] Fast (no electron)!
+- [x] Fast and light (no electron)!
 - [x] Copy passwords!
 - [x] Create vault items!
 - [x] Edit vault items!
@@ -15,12 +21,14 @@ Features:
 * [Usage](#Usage)
 * [Configuration](#Configuration)
 * [Contributing](#Contributing)
+* [Todo](#Todo)
 
 ## Dependencies
 * bitwarden-cli (aur)
 * dmenu
 * yad
 * xclip
+* libnotify (optional)
 
 ## Usage
 Run `dmenu_bw`. <br>
@@ -157,3 +165,13 @@ shell's rc.
 
 ## Contributing
 Please share your comments (and commits) on how to make the program better.
+
+## Todo
+Here is a list of missing features that are currently being worked on.
+- [ ] attachments
+- [ ] configuration options at runtime
+- [ ] custom fields
+- [ ] logo
+- [ ] more gifs
+- [ ] password generator dialog or passwordCmd
+
