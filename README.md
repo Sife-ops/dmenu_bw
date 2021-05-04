@@ -23,7 +23,6 @@ Features:
 * xclip
 
 ## Usage
-
 Run dmenu\_bw. <br>
 
 If you are not logged in, it will ask for your username and password. <br>
@@ -138,12 +137,11 @@ e.g. output identities to a file:
 Options to pass to the dmenu command.
 
 ### editCmd
-
 Editing vault items with yad is not yet supported. Vault items can be
-changed by passing the JSON file for your bitwarden vault item to your
+edited by passing the JSON file for your bitwarden vault item to your
 editor command.
 
-e.g. open files with in st with nvim
+e.g. open files in st with nvim
 ```javascript
 "editCmd": "st -e nvim"
 ```
