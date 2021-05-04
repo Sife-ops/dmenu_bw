@@ -259,7 +259,9 @@ edit_item () {
     # $2: id
     echo "$1" |
         bw encode |
-        bw edit item "$2"
+        bw edit item "$2" &&
+            notify-send "$(basename ${0##/*/})" "Edit successful." ||
+            notify-send "$(basename ${0##/*/})" "Edit failed."
 }
 
 chosen=$(main_list | dmenu ${dmenuOpts}); [ -n "$chosen" ] || exit 1
@@ -291,7 +293,8 @@ case "$chosen" in
                 fi ;;
     "run Bitwarden Electron") bitwarden ;;
     ${sepStr}*) exit 1 ;;
-    *)          id=$(echo "$chosen" | cut -d '|' -f 2 | tr -d '[:space:]')
+    *)          name=$(echo "$chosen" | cut -d '|' -f 1 | tr -d '[:space:]')
+                id=$(echo "$chosen" | cut -d '|' -f 2 | tr -d '[:space:]')
                 item=$(bw list items | jq -c ".[] | select(.id == \"$id\")")
                 itemType=$(echo "$item" | jq -r ".type")
                 case "$itemType" in
@@ -303,13 +306,23 @@ case "$chosen" in
                 chosen=$(item_list | dmenu ${dmenuOpts}); [ -n "$chosen" ] || exit 1
                 case "$chosen" in
                     copy)   keys=$(echo "$copyCmds" | jq -r ".${itemType} | keys[]")
+                            unset fail
                             for key in $keys; do
                                 value=$(echo "$item" | jq -r "${key}")
                                 cmds=$(echo "$copyCmds" | jq -r ".${itemType}[\"${key}\"][]")
                                 for cmd in "$cmds"; do
-                                    eval "$cmd"
+                                    eval "$cmd" || fail=t
                                 done
-                            done ;;
+                            done
+                            if [ -z "$fail" ]; then
+                                notify-send \
+                                    "$(basename ${0##/*/})" \
+                                    "Copy command(s) successful."
+                            else
+                                notify-send \
+                                    "$(basename ${0##/*/})" \
+                                    "Copy command(s) failed."
+                            fi ;;
                     delete) if bw delete item $id; then
                                 notify-send \
                                     "$(basename ${0##/*/})" \
