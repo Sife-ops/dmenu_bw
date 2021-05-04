@@ -5,6 +5,7 @@ configFile="${configHome}/config.json"
 
 if [ -e "$configFile" ]; then
     copyCmds=$(jq -r ".copyCmds" "$configFile")
+    dmenuOpts=$(jq -r ".dmenuOpts" "$configFile")
     editCmd=$(jq -r ".editCmd" "$configFile")
     sessionKeyFile=$(jq -r ".sessionKeyFile" "$configFile"); fi
 
@@ -23,10 +24,15 @@ if [ -z "$copyCmds" ] || [ "$copyCmds" = "null" ]; then
         "card": {},
         "identity": {}
     }'; fi
+if [ -z "$dmenuOpts" ] || [ "$dmenuOpts" = "null" ]; then
+    dmenuOpts="-i -l 10"; fi
 if [ -z "$editCmd" ] || [ "$editCmd" = "null" ]; then
     editCmd="xterm -e nano"; fi
 if [ "$sessionKeyFile" = "null" ]; then
     unset sessionKeyFile; fi
+
+# echo "$dmenuOpts"
+# exit
 
 bwStatus=$(bw status | jq -r '.status')
 case "$bwStatus" in
@@ -151,19 +157,7 @@ edit () {
     # open item with text editor
     $editCmd $item
 
-    # never accept invalid json
-    # Option A:
-    # Force user to submit valid JSON before movin on.
-    # while ! jq "." "$item" 1>/dev/null 2>&1; do
-    #     notify-send \
-    #         "$(basename ${0##/*/})" \
-    #         "Cannot parse invalid JSON."
-    #     eval "$editCmd $item"
-    # done
-
-    # Option B:
-    # Kill the program forcing the user to start over,
-    # giving the user the ability to quit if they want.
+    # do not accept invalid JSON
     if ! jq "." "$item" 1>/dev/null 2>&1; then
         notify-send \
             "$(basename ${0##/*/})" \
@@ -193,10 +187,10 @@ edit_item () {
         bw edit item "$2"
 }
 
-chosen=$(main_list | ${DMENU_CMD:-dmenu -i -l 10}); [ -n "$chosen" ] || exit 1
+chosen=$(main_list | dmenu ${dmenuOpts}); [ -n "$chosen" ] || exit 1
 case "$chosen" in
     ${sepStr}*) exit 1 ;;
-    create)     chosen=$(create_list | ${DMENU_CMD:-dmenu -i -l 10}); [ -n "$chosen" ] || exit 1
+    create)     chosen=$(create_list | dmenu ${dmenuOpts}); [ -n "$chosen" ] || exit 1
                 case "$chosen" in
                     card)           create_item "$(edit "$(template card)")" ;;
                     identity)       create_item "$(edit "$(template identity)")" ;;
@@ -230,7 +224,7 @@ case "$chosen" in
                     3) itemType="card" ;;
                     4) itemType="identity" ;;
                 esac
-                chosen=$(item_list | ${DMENU_CMD:-dmenu -i -l 10}); [ -n "$chosen" ] || exit 1
+                chosen=$(item_list | dmenu ${dmenuOpts}); [ -n "$chosen" ] || exit 1
                 case "$chosen" in
                     copy)   keys=$(echo "$copyCmds" | jq -r ".${itemType} | keys[]")
                             for key in $keys; do

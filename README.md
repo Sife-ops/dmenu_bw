@@ -70,6 +70,7 @@ configuration](#Default-Configuration) is used.
 
 * [Default Configuration](#Default-Configuration)
 * [copyCmds](#copyCmds)
+* [dmenuOpts](#dmenuOpts)
 * [editCmd](#editCmd)
 * [sessionKeyFile](#sessionKeyFile)
 
@@ -92,6 +93,7 @@ configuration](#Default-Configuration) is used.
         "card": {},
         "identity": {}
     },
+    "dmenuOpts": "-i -l 10",
     "editCmd": "xterm -e nano",
 }
 ```
@@ -129,6 +131,9 @@ e.g. output identities to a file:
     ]
 }
 ```
+
+### dmenuOpts
+Options to pass to the dmenu command.
 
 ### editCmd
 The command to run when editing or creating vault items.<br>
