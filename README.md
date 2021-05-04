@@ -106,7 +106,11 @@ used.
     "editCmd": "xterm -e nano",
 }
 ```
-Hint: use sxhkd to paste your primary clipboard
+Notice that the default behavior is to copy the username to clipboard and
+password to primary at the same time. That is so you can paste both at the same
+time without having going back and forth to the password manager. <br>
+
+Hint: use sxhkd to paste your primary clipboard with `Super + v`
 ```
 mod4+v
     sleep 0.25 &&
@@ -114,7 +118,7 @@ mod4+v
 ```
 
 ### copyCmds
-Contains objects for each of the bitwarden item types.
+Contains objects for each of the Bitwarden item types.
 Each object contains an array named after the property of said item.
 The array contains commands to be evaluated where `$value` is the
 value of the property of said item. <br>
@@ -146,7 +150,7 @@ Options to pass to the dmenu command.
 
 ### editCmd
 Editing vault items with yad is not yet supported. Vault items can be
-edited by passing the JSON file for your bitwarden vault item to your
+edited by passing the JSON file for your Bitwarden vault item to your
 editor command.
 
 e.g. edit items with st and nvim
@@ -171,6 +175,7 @@ Here is a list of missing features that are currently being worked on.
 - [ ] attachments
 - [ ] configuration options at runtime
 - [ ] custom fields
+- [ ] editing vault items with yad
 - [ ] logo
 - [ ] more gifs
 - [ ] password generator dialog or passwordCmd
