@@ -95,8 +95,8 @@ main_list () {
     echo "sync"
     sep
     bw list items | jq -r '.[] | "\(.name) | \(.id)"'
-    # sep
-    # echo "run Bitwarden Electron"
+    sep
+    echo "run Bitwarden Electron"
 }
 
 item_list () {
@@ -111,93 +111,6 @@ create_list () {
     echo "login"
     echo "secure note"
 }
-
-template () {
-    # generate item template
-    # $1: item type
-    # return: item json
-    item="$(bw get template item)"
-    template="$(bw get template item."$1")"
-    item="$(echo "$item" | jq -c ".$1 = $template")"
-    # item="$(echo "$item" | jq -c ".name = null")"
-    # item="$(echo "$item" | jq -c ".notes = null")"
-    case "$1" in
-        identity)   item="$(echo "$item" | jq -c '.type = 1')" ;;
-        secureNote) item="$(echo "$item" | jq -c '.type = 2')" ;;
-        card)   item="$(echo "$item" | jq -c '.type = 3')" ;;
-        login)
-                # item="$(echo "$item" | jq -c ".login.username = null")"
-                password=$(tr -dc 'A-Za-z0-9!@#$%^&*()-=_+[]~{}|;:,./<>?' \
-                    < /dev/urandom | head -c 16)
-                item="$(echo "$item" | jq -c ".login.password = \"${password}\"")"
-                uri="$(bw get template item.login.uri)"
-                item="$(echo "$item" | jq -c ".login.uris = [${uri}]")"
-                item="$(echo "$item" | jq -c ".login.uris[0].uri = null")"
-                tmux set-buffer "$password" ;;
-        "") kill 0 ;;
-        *) kill 0 ;;
-    esac
-    echo "$item"
-}
-
-newItem="$(bw get template item)"
-
-template="$(bw get template item.login)"
-newItem="$(echo "$newItem" | jq -c ".login = $template")"
-uri="$(bw get template item.login.uri)"
-newItem="$(echo "$newItem" | jq -c ".login.uris = [${uri}]")"
-
-echo "$newItem"
-
-formSep=$RANDOM
-form="$(yad --form \
-    --field=$"Name" "aaa" \
-    --field=$"Username" "bbb" \
-    --field=$"Password":H "" \
-    --field=$"URI" "" \
-    --field=$"Folder" "" \
-    --field=$"Favorite":CHK "false" \
-    --field=$"Notes":TXT "" \
-    --separator="$formSep")"
-
-name="$(echo "$form" | awk -F "$formSep" '{print $1}')"
-[ "$name" = "" ] &&
-    newItem="$(echo "$newItem" | jq -c ".name = null")" ||
-    newItem="$(echo "$newItem" | jq -c ".name = \"$name\"")"
-
-username="$(echo "$form" | awk -F "$formSep" '{print $2}')"
-[ "$username" = "" ] &&
-    newItem="$(echo "$newItem" | jq -c ".login.username = null")" ||
-    newItem="$(echo "$newItem" | jq -c ".login.username = \"$username\"")"
-
-password="$(echo "$form" | awk -F "$formSep" '{print $3}')"
-[ "$password" = "" ] &&
-    newItem="$(echo "$newItem" | jq -c ".login.password = null")" ||
-    newItem="$(echo "$newItem" | jq -c ".login.password = \"$password\"")"
-
-uri="$(echo "$form" | awk -F "$formSep" '{print $4}')"
-[ "$uri" = "" ] &&
-    newItem="$(echo "$newItem" | jq -c ".login.uris[0].uri = null")" ||
-    newItem="$(echo "$newItem" | jq -c ".login.uris[0].uri = \"$uri\"")"
-
-folderId="$(echo "$form" | awk -F "$formSep" '{print $5}')"
-[ "$folderId" = "" ] &&
-    newItem="$(echo "$newItem" | jq -c ".folderId = null")" ||
-    newItem="$(echo "$newItem" | jq -c ".folderId = \"$folderId\"")"
-
-favorite="$(echo "$form" | awk -F "$formSep" '{print $6}')"
-[ "$favorite" = "TRUE" ] &&
-    newItem="$(echo "$newItem" | jq -c ".favorite = true")" ||
-    newItem="$(echo "$newItem" | jq -c ".favorite = false")"
-
-notes="$(echo "$form" | awk -F "$formSep" '{print $7}')"
-[ "$notes" = "" ] &&
-    newItem="$(echo "$newItem" | jq -c ".notes = null")" ||
-    newItem="$(echo "$newItem" | jq -c ".notes = \"$notes\"")"
-
-echo "========================="
-echo "$newItem"
-exit
 
 edit () {
     # edit a vault item
@@ -227,10 +140,72 @@ edit () {
     rm -rf "$safe" 1>/dev/null 2>&1
 }
 
-create_item () {
+create () {
     # create a vault item
-    # $1: item json
-    echo "$1" |
+    # $1: item type
+
+    item="$(bw get template item)"
+    template="$(bw get template item.${1})"
+    item="$(echo "$item" | jq -c ".${1} = ${template}")"
+
+    formSep="$(tr -dc '[:digit:]' < /dev/urandom | head -c 5)"
+    case "$1" in
+        login) #^
+            uri="$(bw get template item.login.uri)"
+            item="$(echo "$item" | jq -c ".login.uris = [${uri}]")"
+
+            form="$(yad --form \
+                --field=$"Name" "aaa" \
+                --field=$"Username" "bbb" \
+                --field=$"Password":H "" \
+                --field=$"URI" "" \
+                --field=$"Folder" "" \
+                --field=$"Favorite":CHK "false" \
+                --field=$"Notes":TXT "" \
+                --separator="$formSep" || kill 0)"
+
+            name="$(echo "$form" | awk -F "$formSep" '{print $1}')"
+            [ "$name" = "" ] &&
+                item="$(echo "$item" | jq -c ".name = null")" ||
+                item="$(echo "$item" | jq -c ".name = \"$name\"")"
+
+            username="$(echo "$form" | awk -F "$formSep" '{print $2}')"
+            [ "$username" = "" ] &&
+                item="$(echo "$item" | jq -c ".login.username = null")" ||
+                item="$(echo "$item" | jq -c ".login.username = \"$username\"")"
+
+            password="$(echo "$form" | awk -F "$formSep" '{print $3}')"
+            [ "$password" = "" ] &&
+                item="$(echo "$item" | jq -c ".login.password = null")" ||
+                item="$(echo "$item" | jq -c ".login.password = \"$password\"")"
+
+            uri="$(echo "$form" | awk -F "$formSep" '{print $4}')"
+            [ "$uri" = "" ] &&
+                item="$(echo "$item" | jq -c ".login.uris[0].uri = null")" ||
+                item="$(echo "$item" | jq -c ".login.uris[0].uri = \"$uri\"")"
+
+            folderId="$(echo "$form" | awk -F "$formSep" '{print $5}')"
+            [ "$folderId" = "" ] &&
+                item="$(echo "$item" | jq -c ".folderId = null")" ||
+                item="$(echo "$item" | jq -c ".folderId = \"$folderId\"")"
+
+            favorite="$(echo "$form" | awk -F "$formSep" '{print $6}')"
+            [ "$favorite" = "TRUE" ] &&
+                item="$(echo "$item" | jq -c ".favorite = true")" ||
+                item="$(echo "$item" | jq -c ".favorite = false")"
+
+            notes="$(echo "$form" | awk -F "$formSep" '{print $7}')"
+            [ "$notes" = "" ] &&
+                item="$(echo "$item" | jq -c ".notes = null")" ||
+                item="$(echo "$item" | jq -c ".notes = \"$notes\"")"
+            ;; #$
+        *) kill 0 ;;
+        # card) : ;;
+        # identity) : ;;
+        # secure_note) : ;;
+    esac
+
+    echo "$item" |
         bw encode |
         bw create item
 }
@@ -246,13 +221,12 @@ edit_item () {
 
 chosen=$(main_list | dmenu ${dmenuOpts}); [ -n "$chosen" ] || exit 1
 case "$chosen" in
-    ${sepStr}*) exit 1 ;;
     create)     chosen=$(create_list | dmenu ${dmenuOpts}); [ -n "$chosen" ] || exit 1
                 case "$chosen" in
-                    card)           create_item "$(edit "$(template card)")" ;;
-                    identity)       create_item "$(edit "$(template identity)")" ;;
-                    login)          create_item "$(edit "$(template login)")" ;;
-                    "secure note")  create_item "$(edit "$(template securenote)")" ;;
+                    card)           create card ;;
+                    identity)       create identity ;;
+                    login)          create login ;;
+                    "secure note")  create secure_note ;;
                 esac ;;
     logout)     if bw logout; then
                     notify-send \
@@ -272,6 +246,8 @@ case "$chosen" in
                         "$(basename ${0##/*/})" \
                         "Sync failed."
                 fi ;;
+    "run Bitwarden Electron") bitwarden ;;
+    ${sepStr}*) exit 1 ;;
     *)          id=$(echo "$chosen" | cut -d '|' -f 2 | tr -d '[:space:]')
                 item=$(bw list items | jq -c ".[] | select(.id == \"$id\")")
                 itemType=$(echo "$item" | jq -r ".type")
@@ -295,3 +271,5 @@ case "$chosen" in
                     edit)   edit_item "$(edit "$item")" $id ;;
                 esac ;;
 esac
+
+# vim: fdm=marker fmr=#^,#$
