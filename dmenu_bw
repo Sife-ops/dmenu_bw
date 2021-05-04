@@ -140,6 +140,20 @@ edit () {
     rm -rf "$safe" 1>/dev/null 2>&1
 }
 
+form () {
+    i=0
+    for prop in $(echo -e "$1"); do
+        i=$(( $i + 1 ))
+        fieldVal="$(echo "$form" | awk -F "$formSep" "{print \$${i}}")"
+        case "$fieldVal" in
+            "") item="$(echo "$item" | jq -c "${prop} = null")" ;;
+            TRUE) item="$(echo "$item" | jq -c "${prop} = true")" ;;
+            FALSE) item="$(echo "$item" | jq -c "${prop} = false")" ;;
+            *) item="$(echo "$item" | jq -c "${prop} = \"$fieldVal\"")" ;;
+        esac
+    done
+}
+
 create () {
     # create a vault item
     # $1: item type
@@ -150,6 +164,7 @@ create () {
 
     formSep="$(tr -dc '[:digit:]' < /dev/urandom | head -c 5)"
     case "$1" in
+
         login) #^
             uri="$(bw get template item.login.uri)"
             item="$(echo "$item" | jq -c ".login.uris = [${uri}]")"
@@ -164,43 +179,10 @@ create () {
                 --field=$"Notes":TXT "" \
                 --separator="$formSep" || kill 0)"
 
-            name="$(echo "$form" | awk -F "$formSep" '{print $1}')"
-            [ "$name" = "" ] &&
-                item="$(echo "$item" | jq -c ".name = null")" ||
-                item="$(echo "$item" | jq -c ".name = \"$name\"")"
-
-            username="$(echo "$form" | awk -F "$formSep" '{print $2}')"
-            [ "$username" = "" ] &&
-                item="$(echo "$item" | jq -c ".login.username = null")" ||
-                item="$(echo "$item" | jq -c ".login.username = \"$username\"")"
-
-            password="$(echo "$form" | awk -F "$formSep" '{print $3}')"
-            [ "$password" = "" ] &&
-                item="$(echo "$item" | jq -c ".login.password = null")" ||
-                item="$(echo "$item" | jq -c ".login.password = \"$password\"")"
-
-            uri="$(echo "$form" | awk -F "$formSep" '{print $4}')"
-            [ "$uri" = "" ] &&
-                item="$(echo "$item" | jq -c ".login.uris[0].uri = null")" ||
-                item="$(echo "$item" | jq -c ".login.uris[0].uri = \"$uri\"")"
-
-            folderId="$(echo "$form" | awk -F "$formSep" '{print $5}')"
-            [ "$folderId" = "" ] &&
-                item="$(echo "$item" | jq -c ".folderId = null")" ||
-                item="$(echo "$item" | jq -c ".folderId = \"$folderId\"")"
-
-            favorite="$(echo "$form" | awk -F "$formSep" '{print $6}')"
-            [ "$favorite" = "TRUE" ] &&
-                item="$(echo "$item" | jq -c ".favorite = true")" ||
-                item="$(echo "$item" | jq -c ".favorite = false")"
-
-            notes="$(echo "$form" | awk -F "$formSep" '{print $7}')"
-            [ "$notes" = "" ] &&
-                item="$(echo "$item" | jq -c ".notes = null")" ||
-                item="$(echo "$item" | jq -c ".notes = \"$notes\"")"
+            form ".name\n.login.username\n.login.password\n.login.uris[0].uri\n.folderId\n.favorite\n.notes"
             ;; #$
 
-        securenote)
+        securenote) #^
             item="$(echo "$item" | jq -c '.type = 2')"
 
             form="$(yad --form \
@@ -210,11 +192,10 @@ create () {
                 --field=$"Notes":TXT "" \
                 --separator="$formSep" || kill 0)"
 
-            kill 0
+            form ".name\n.folderId\n.favorite\n.notes"
+            ;; #$
 
-            ;;
-
-        card)
+        card) #^
             item="$(echo "$item" | jq -c '.type = 3')"
 
             form="$(yad --form \
@@ -229,11 +210,10 @@ create () {
                 --field=$"Notes":TXT "" \
                 --separator="$formSep" || kill 0)"
 
-            kill 0
+            form ".name\n.card.cardholderName\n.card.number\n.card.brand\n.card.expMonth\n.card.expYear\n.card.code\n.folderId\n.favorite\n.notes"
+            ;; #$
 
-            ;;
-
-        identity)
+        identity) #^
             item="$(echo "$item" | jq -c '.type = 4')"
 
             form="$(yad --form \
@@ -260,20 +240,15 @@ create () {
                 --field=$"Notes":TXT "" \
                 --separator="$formSep" || kill 0)"
 
-            kill 0
-
-            ;;
+            form ".name\n.identity.title\n.identity.firstName\n.identity.middleName\n.identity.lastName\n.identity.username\n.identity.company\n.identity.ssn\n.identity.passportNumber\n.identity.licenseNumber\n.identity.email\n.identity.address1\n.identity.address2\n.identity.address3\n.identity.city\n.identity.state\n.identity.postalCode\n.identity.country\n.favorite\n.folder\n.notes"
+            ;; #$
 
         *) kill 0 ;;
-
     esac
 
-    echo "$item"
-
-    # echo "$item" |
-    #     bw encode |
-    #     bw create item
-
+    echo "$item" |
+        bw encode |
+        bw create item
 }
 
 edit_item () {
