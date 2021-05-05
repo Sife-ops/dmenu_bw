@@ -22,7 +22,7 @@ if [ -z "$copyCmds" ] || [ "$copyCmds" = "null" ]; then
                 "echo \"$value\" | xclip -i -selection primary"
             ]
         },
-        "securenote": {},
+        "secureNote": {},
         "card": {},
         "identity": {}
     }'; fi
@@ -114,10 +114,10 @@ form () { #^
         i=$(( i + 1 ))
         fieldVal="$(echo "$form" | awk -F "$formSep" "{print \$${i}}")"
         case "$fieldVal" in
-            "") item="$(echo "$item" | jq -c "${prop} = null")" ;;
-            TRUE) item="$(echo "$item" | jq -c "${prop} = true")" ;;
-            FALSE) item="$(echo "$item" | jq -c "${prop} = false")" ;;
-            *) item="$(echo "$item" | jq -c "${prop} = \"$fieldVal\"")" ;;
+            "") newItem="$(echo "$newItem" | jq -c "${prop} = null")" ;;
+            TRUE) newItem="$(echo "$newItem" | jq -c "${prop} = true")" ;;
+            FALSE) newItem="$(echo "$newItem" | jq -c "${prop} = false")" ;;
+            *) newItem="$(echo "$newItem" | jq -c "${prop} = \"$fieldVal\"")" ;;
         esac
     done
 } #$
@@ -126,16 +126,16 @@ create () { #^
     # create a vault item
     # $1: item type
 
-    item="$(bw get template item)"
-    template="$(bw get template item."${1}")"
-    item="$(echo "$item" | jq -c ".${1} = ${template}")"
+    newItem="$(bw get template item)"
+    template="$(bw get template item."${1}")" # securenote vs. secureNote
+    newItem="$(echo "$newItem" | jq -c ".${1} = ${template}")"
 
     formSep="$(tr -dc '[:digit:]' < /dev/urandom | head -c 5)"
     case "$1" in
 
         login) #^
             uri="$(bw get template item.login.uri)"
-            item="$(echo "$item" | jq -c ".login.uris = [${uri}]")"
+            newItem="$(echo "$newItem" | jq -c ".login.uris = [${uri}]")"
 
             [ -n "$passwordGenCmd" ] &&
                 password=$(eval "$passwordGenCmd")
@@ -153,8 +153,8 @@ create () { #^
             form ".name\n.login.username\n.login.password\n.login.uris[0].uri\n.folderId\n.favorite\n.notes"
             ;; #$
 
-        securenote) #^
-            item="$(echo "$item" | jq -c '.type = 2')"
+        secureNote) #^
+            newItem="$(echo "$newItem" | jq -c '.type = 2')"
 
             form="$(yad --form \
                 --field=$"Name" "" \
@@ -164,18 +164,24 @@ create () { #^
                 --separator="$formSep" || kill 0)"
 
             form ".name\n.folderId\n.favorite\n.notes"
+
+            # echo "$newItem" | jq
+            # # echo "$form"
+            # kill 0
+
             ;; #$
 
         card) #^
-            item="$(echo "$item" | jq -c '.type = 3')"
+            newItem="$(echo "$newItem" | jq -c '.type = 3')"
 
             form="$(yad --form \
                 --field=$"Name" "" \
                 --field=$"Cardholder Name" "" \
                 --field=$"Number":H "" \
-                --field=$"Brand":CBE "Visa!Mastercard!American Express" \
-                --field=$"Expiration Date":DT \
-                --field=$"Security Code":H "" \
+                --field=$"Brand":CBE "Visa!Mastercard!American Express!Discover!Diners Club!JCB!Maestro!UnionPay" \
+                --field=$"Expiration Month":NUM "!1..12" \
+                --field=$"Expiration Year":NUM "!1900..9999" \
+                --field=$"Security Code":NUM "!100..999" \
                 --field=$"Folder" "" \
                 --field=$"Favorite":CHK "false" \
                 --field=$"Notes":TXT "" \
@@ -185,7 +191,7 @@ create () { #^
             ;; #$
 
         identity) #^
-            item="$(echo "$item" | jq -c '.type = 4')"
+            newItem="$(echo "$newItem" | jq -c '.type = 4')"
 
             form="$(yad --form \
                 --field=$"Name" "" \
@@ -217,7 +223,7 @@ create () { #^
         *) kill 0 ;;
     esac
 
-    echo "$item" |
+    echo "$newItem" |
         bw encode |
         bw create item &&
             notify-send "$self" "Creation successful." ||
@@ -258,7 +264,7 @@ case "$chosen" in
     create)     chosen=$(create_list | dmenu ${dmenuOpts}); [ -n "$chosen" ] || exit 1
                 case "$chosen" in
                     login)          create login ;;
-                    "secure note")  create securenote ;;
+                    "secure note")  create secureNote ;;
                     card)           create card ;;
                     identity)       create identity ;;
                 esac ;;
@@ -270,23 +276,23 @@ case "$chosen" in
                     notify-send "$self" "Sync failed." ;;
     "run Bitwarden Electron") bitwarden ;;
     ${sepStr}*) exit 1 ;;
-    *)          name=$(echo "$chosen" | cut -d '|' -f 1 | tr -d '[:space:]')
+    *)          name=$(echo "$chosen" | cut -d '|' -f 1 | tr -d '[:space:]') # use awk
                 id=$(echo "$chosen" | cut -d '|' -f 2 | tr -d '[:space:]')
                 item=$(bw list items | jq -c ".[] | select(.id == \"$id\")")
                 itemType=$(echo "$item" | jq -r ".type")
                 case "$itemType" in
-                    1) itemType="login" ;;
-                    2) itemType="securenote" ;;
-                    3) itemType="card" ;;
-                    4) itemType="identity" ;;
+                    1) itemType=".login" ;;
+                    2) itemType=".secureNote" ;;
+                    3) itemType=".card" ;;
+                    4) itemType=".identity" ;;
                 esac
                 chosen=$(item_list | dmenu ${dmenuOpts}); [ -n "$chosen" ] || exit 1
                 case "$chosen" in
-                    copy)   keys=$(echo "$copyCmds" | jq -r ".${itemType} | keys[]")
+                    copy)   keys=$(echo "$copyCmds" | jq -r "${itemType} | keys[]")
                             unset fail
                             for key in $keys; do
                                 value=$(echo "$item" | jq -r "${key}")
-                                cmds=$(echo "$copyCmds" | jq -r ".${itemType}[\"${key}\"][]")
+                                cmds=$(echo "$copyCmds" | jq -r "${itemType}[\"${key}\"][]")
                                 for cmd in "$cmds"; do
                                     if ! eval "$cmd"; then
                                         notify-send "$self" "Copy command failed: \"$cmd\""
