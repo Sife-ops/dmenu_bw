@@ -55,8 +55,9 @@ Select an item from the main list and select `copy`. See
 [configuration/copyCmds](#copyCmds).
 
 ### Creating Vault Items
-Select `create` from the main list. Passwords are automatically generated using
-a custom command. See [configuration/passwordGenCmd](#passwordGenCmd).
+Select `create` from the main list. Passwords are automatically generated based
+on the `passwordGenCmd` option. See
+[configuration/passwordGenCmd](#passwordGenCmd).
 
 ### Editing Vault Items
 Select an item from the main list and select `edit`. See
@@ -185,4 +186,3 @@ Here is a list of missing features that are currently being worked on.
 - [ ] editing vault items with yad
 - [ ] logo
 - [ ] more gifs
-- [ ] password generator dialog or passwordCmd

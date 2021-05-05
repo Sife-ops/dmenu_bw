@@ -164,11 +164,6 @@ create () { #^
                 --separator="$formSep" || kill 0)"
 
             form ".name\n.folderId\n.favorite\n.notes"
-
-            # echo "$newItem" | jq
-            # # echo "$form"
-            # kill 0
-
             ;; #$
 
         card) #^
