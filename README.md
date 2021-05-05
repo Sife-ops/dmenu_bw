@@ -55,7 +55,7 @@ Select an item from the main list and select `copy`. See
 [configuration/copyCmds](#copyCmds).
 
 ### Creating Vault Items
-Select `create` from the main list. See [configuration/editCmd](#editCmd).
+Select `create` from the main list.
 
 ### Editing Vault Items
 Select an item from the main list and select `edit`. See
