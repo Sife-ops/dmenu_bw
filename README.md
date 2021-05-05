@@ -56,15 +56,17 @@ Select an item from the main list and select `copy`. See
 [configuration/copyCmds](#copyCmds).
 
 ### Creating Vault Items
-Select `create` from the main list. Passwords are automatically generated based
-on the `passwordGenCmd` option. See
-[configuration/passwordGenCmd](#passwordGenCmd).
+Select `create` from the main list. Passwords are
+automatically generated based on the `passwordGenCmd` option.
+See [configuration/passwordGenCmd](#passwordGenCmd). <br>
 ![giphy](https://media.giphy.com/media/QJjiAE9AzytpMc2ZLH/giphy.gif) <br>
 *time: 4.33s*
 
 ### Editing Vault Items
 Select an item from the main list and select `edit`. See
-[configuration/editCmd](#editCmd).
+[configuration/editCmd](#editCmd). <br>
+![giphy](https://media.giphy.com/media/7lpknCtwHI0xidnIni/giphy.gif) <br>
+*time: 5.16*
 
 ### Deleting Vault Items
 Select an item from the main list and select `delete`.
