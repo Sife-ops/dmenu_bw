@@ -2,15 +2,16 @@
 
 ![giphy](https://media.giphy.com/media/iEJ7HRPdOpWUrNy3Ue/giphy.gif)
 
-A minimal Bitwarden GUI written in POSIX shellscript. <br>
+A minimal Bitwarden GUI written in POSIX shellscript.
 
 I created dmenu\_bw as a hotkeyed password manager for minimal window manager
 desktop sessions. It is highly inspired by the mouseless workflow of tiling
 window managers, allowing the rapid lookup, creation, and editing of Bitwarden
 vault items. The goal of dmenu\_bw is to provide the same capabilities as the
-official Bitwarden client but without the Electron dependency. <br>
+official Bitwarden client but without the Electron dependency.
 
-Features: <br>
+Features:
+
 - [x] Fast 🔥🔥🔥
 - [x] Light (no Electron)! 🪶
 - [x] Copy passwords!
@@ -32,17 +33,17 @@ Features: <br>
 * libnotify (optional)
 
 ## Usage
-Run `dmenu_bw`. <br>
+Run `dmenu_bw`.
 
-If you are not logged in, it will ask for your username and password. <br>
+If you are not logged in, it will ask for your username and password.
 
 If you are logged in, but your session is locked, it will ask for your
-password. See [configuration/sessionKeyFile](#sessionKeyFile) <br>
+password. See [configuration/sessionKeyFile](#sessionKeyFile)
 
 If login was successful or your session was already unlocked, it will
 show the main list of actions [create](#Creating-Vault-Items),
 [logout](#Logging-Out), [sync](#Syncing-Vault-Items), and the list of
-vault items. <br>
+vault items.
 
 * [Copying Passwords](#Copying-Passwords)
 * [Creating Vault Items](#Creating-Vault-Items)
@@ -58,15 +59,19 @@ Select an item from the main list and select `copy`. See
 ### Creating Vault Items
 Select `create` from the main list. Passwords are
 automatically generated based on the `passwordGenCmd` option.
-See [configuration/passwordGenCmd](#passwordGenCmd). <br>
-![giphy](https://media.giphy.com/media/QJjiAE9AzytpMc2ZLH/giphy.gif) <br>
+See [configuration/passwordGenCmd](#passwordGenCmd).
+
+![giphy](https://media.giphy.com/media/QJjiAE9AzytpMc2ZLH/giphy.gif)
+
 *time: 4.33s*
 
 ### Editing Vault Items
 Select an item from the main list and select `edit`. See
-[configuration/editCmd](#editCmd). <br>
-![giphy](https://media.giphy.com/media/7lpknCtwHI0xidnIni/giphy.gif) <br>
-*time: 5.16*
+[configuration/editCmd](#editCmd).
+
+![giphy](https://media.giphy.com/media/7lpknCtwHI0xidnIni/giphy.gif)
+
+*time: 5.16s*
 
 ### Deleting Vault Items
 Select an item from the main list and select `delete`.
@@ -79,9 +84,8 @@ Select `logout` from the main list.
 
 
 ## Configuration
-
-dmenu\_bw looks for `${XDG_CONFIG_HOME}/dmenu_bw/config.json`.  If no
-file is found, the [default configuration](#Default-Configuration) is
+dmenu\_bw looks for `${XDG_CONFIG_HOME:-${HOME}/.config}/dmenu_bw/config.json`.
+If no file is found, the [default configuration](#Default-Configuration) is
 used.
 
 * [Default Configuration](#Default-Configuration)
@@ -114,7 +118,6 @@ used.
 Notice that the default behavior is to copy the username to clipboard and
 password to primary at the same time. This is so you can paste your username
 and password time without having going back and forth to the password manager.
-<br>
 
 Hint: use middle mouse click to paste your primary clipboard, or use sxhkd to
 paste your primary clipboard with `Super + v`
@@ -128,7 +131,7 @@ mod4+v
 Contains objects for each of the Bitwarden item types.
 Each object contains an array named after the property of said item.
 The array contains commands to be evaluated where `$value` is the
-value of the property of said item. <br>
+value of the property of said item.
 
 e.g. copy usernames and passwords to the clipboard and tmux:
 ```javascript
@@ -169,7 +172,7 @@ The command for automatically generating new login passwords.
 
 e.g. generate a random 16-character password
 ```javascript
-"passwordGenCmd":"tr -dc 'a-zA-Z0-9!@#$%^&*()-=_+[]~{}|;:,./<>?' < /dev/urandom | head -c 16"
+"passwordGenCmd": "tr -dc 'a-zA-Z0-9!@#$%^&*()-=_+[]~{}|;:,./<>?' < /dev/urandom | head -c 16"
 ```
 
 ### sessionKeyFile
@@ -177,8 +180,14 @@ The path of the file to output your `BW_SESSION` shell export whenever
 a new session key is generated. If you like this method of session
 persistence, simply set sessionKeyFile and source that file in your
 shell's rc.
+
+config.json:
 ```javascript
-"sessionKeyFile": "/home/foo/.config/zsh/conf.d/99-bitwarden.zsh"
+"sessionKeyFile": "/home/foo/.cache/bwsession"
+```
+.bashrc
+```bash
+source /home/foo/.cache/bwsession
 ```
 
 ## Contributing
