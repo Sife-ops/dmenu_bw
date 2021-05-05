@@ -162,7 +162,7 @@ The command for automatically generating new login passwords.
 
 e.g. generate a random 16-character password
 ```javascript
-"passwordGenCmd":"tr -dc 'a-zA-Z0-9!@#$%^&*()-=_+[]~{}|;:,./<>?' < /dev/urandom | head -c 16",
+"passwordGenCmd":"tr -dc 'a-zA-Z0-9!@#$%^&*()-=_+[]~{}|;:,./<>?' < /dev/urandom | head -c 16"
 ```
 
 ### sessionKeyFile

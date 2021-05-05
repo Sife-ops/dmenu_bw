@@ -26,10 +26,10 @@ if [ -z "$copyCmds" ] || [ "$copyCmds" = "null" ]; then
         "card": {},
         "identity": {}
     }'; fi
-[ -z "$dmenuOpts" ] || [ "$dmenuOpts" = "null" ] &&
-    dmenuOpts="-i -l 10"
-[ -z "$editCmd" ] || [ "$editCmd" = "null" ] &&
-    editCmd="xterm -e nano"
+if [ -z "$dmenuOpts" ] || [ "$dmenuOpts" = "null" ]; then
+    dmenuOpts="-i -l 10"; fi
+if [ -z "$editCmd" ] || [ "$editCmd" = "null" ]; then
+    editCmd="xterm -e nano"; fi
 [ "$passwordGenCmd" = "null" ] &&
     unset passwordGenCmd
 [ "$sessionKeyFile" = "null" ] &&
@@ -57,7 +57,7 @@ case "$bwStatus" in
                     --hide-text)
                 sessionKey="$(bw unlock "$password" --raw)" ;;
             *)  notify-send "$self" "Failed to unlock session."
-                kill 0 ;;
+                exit 1 ;;
         esac
 
         # output session key to file
@@ -71,7 +71,7 @@ case "$bwStatus" in
         case $(bw status | jq -r '.status') in
             unlocked) : ;;
             *)  notify-send "$self" "Failed to unlock session."
-                kill 0 ;;
+                exit 1 ;;
         esac ;;
 esac
 
@@ -130,7 +130,6 @@ edit () {
     fi
 
     # delete temporary files
-    jq -c "$item"
     rm -rf "$safe" 1>/dev/null 2>&1
 }
 
@@ -246,11 +245,9 @@ create () {
     echo "$item" |
         bw encode |
         bw create item
-
-    if [ "$?" = 0 ]; then
-            notify-send "$self" "Creation successful."
-    else
-            notify-send "$self" "Creation failed."; fi
+    [ "$?" = 0 ] &&
+        notify-send "$self" "Creation successful." ||
+        notify-send "$self" "Creation failed."
 }
 
 edit_item () {
@@ -260,11 +257,9 @@ edit_item () {
     echo "$1" |
         bw encode |
         bw edit item "$2"
-
-    if [ "$?" = 0 ]; then
-            notify-send "$self" "Edit successful."
-    else
-            notify-send "$self" "Edit failed."; fi
+    [ "$?" = 0 ] &&
+            notify-send "$self" "Edit successful." ||
+            notify-send "$self" "Edit failed."
 }
 
 chosen=$(main_list | dmenu ${dmenuOpts}); [ -n "$chosen" ] || exit 1
