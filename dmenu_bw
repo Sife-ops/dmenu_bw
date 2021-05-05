@@ -4,10 +4,10 @@ configHome="${XDG_CONFIG_HOME}/dmenu_bw"
 configFile="${configHome}/config.json"
 
 if [ -e "$configFile" ]; then
-    copyCmds=$(jq -r ".copyCmds" "$configFile")
-    dmenuOpts=$(jq -r ".dmenuOpts" "$configFile")
-    editCmd=$(jq -r ".editCmd" "$configFile")
-    sessionKeyFile=$(jq -r ".sessionKeyFile" "$configFile"); fi
+    copyCmds="$(jq -r ".copyCmds" "$configFile")"
+    dmenuOpts="$(jq -r ".dmenuOpts" "$configFile")"
+    editCmd="$(jq -r ".editCmd" "$configFile")"
+    sessionKeyFile="$(jq -r ".sessionKeyFile" "$configFile")"; fi
 
 if [ -z "$copyCmds" ] || [ "$copyCmds" = "null" ]; then
     copyCmds='
@@ -37,7 +37,7 @@ case "$bwStatus" in
     *)  case "$bwStatus" in
             unauthenticated)
                 notify-send \
-                    "$(basename ${0##/*/})" \
+                    "$(basename "${0##/*/}")" \
                     "Unauthenticated session. Acquiring new session key."
                 email=$(yad \
                     --title "Email" \
@@ -49,7 +49,7 @@ case "$bwStatus" in
                 sessionKey="$(bw login "$email" "$password" --raw)" ;;
             locked)
                 notify-send \
-                    "$(basename ${0##/*/})" \
+                    "$(basename "${0##/*/}")" \
                     "Session locked. Acquiring new session key."
                 password=$(yad \
                     --title "Password" \
@@ -57,7 +57,7 @@ case "$bwStatus" in
                     --hide-text)
                 sessionKey="$(bw unlock "$password" --raw)" ;;
             *)  notify-send \
-                    "$(basename ${0##/*/})" \
+                    "$(basename "${0##/*/}")" \
                     "Failed to unlock session."
                 kill 0 ;;
         esac
@@ -73,7 +73,7 @@ case "$bwStatus" in
         case $(bw status | jq -r '.status') in
             unlocked) : ;;
             *)  notify-send \
-                    "$(basename ${0##/*/})" \
+                    "$(basename "${0##/*/}")" \
                     "Failed to unlock session."
                 kill 0 ;;
         esac ;;
@@ -84,7 +84,7 @@ sep () {
     i=0
     while [ $i -le 500 ]; do
         printf "%s" "$sepStr"
-        i=$(( $i + 1 ))
+        i=$(( i + 1 ))
     done
     printf "\n"
 }
@@ -125,25 +125,25 @@ edit () {
     echo "$1" | jq > "$item"
 
     # open item with text editor
-    $editCmd $item
+    $editCmd "$item"
 
     # do not accept invalid JSON
     if ! jq "." "$item" 1>/dev/null 2>&1; then
         notify-send \
-            "$(basename ${0##/*/})" \
+            "$(basename "${0##/*/}")" \
             "Cannot parse invalid JSON."
         kill 0
     fi
 
     # delete temporary files
-    cat "$item" | jq -c
+    jq -c "$item"
     rm -rf "$safe" 1>/dev/null 2>&1
 }
 
 form () {
     i=0
-    for prop in $(echo -e "$1"); do
-        i=$(( $i + 1 ))
+    for prop in $(printf "%b" "$1"); do
+        i=$(( i + 1 ))
         fieldVal="$(echo "$form" | awk -F "$formSep" "{print \$${i}}")"
         case "$fieldVal" in
             "") item="$(echo "$item" | jq -c "${prop} = null")" ;;
@@ -159,7 +159,7 @@ create () {
     # $1: item type
 
     item="$(bw get template item)"
-    template="$(bw get template item.${1})"
+    template="$(bw get template item."${1}")"
     item="$(echo "$item" | jq -c ".${1} = ${template}")"
 
     formSep="$(tr -dc '[:digit:]' < /dev/urandom | head -c 5)"
@@ -248,9 +248,12 @@ create () {
 
     echo "$item" |
         bw encode |
-        bw create item &&
-            notify-send "$(basename ${0##/*/})" "Creation successful." ||
-            notify-send "$(basename ${0##/*/})" "Creation failed."
+        bw create item
+
+    if [ "$?" = 0 ]; then
+            notify-send "$(basename "${0##/*/}")" "Creation successful."
+    else
+            notify-send "$(basename "${0##/*/}")" "Creation failed."; fi
 }
 
 edit_item () {
@@ -259,9 +262,12 @@ edit_item () {
     # $2: id
     echo "$1" |
         bw encode |
-        bw edit item "$2" &&
-            notify-send "$(basename ${0##/*/})" "Edit successful." ||
-            notify-send "$(basename ${0##/*/})" "Edit failed."
+        bw edit item "$2"
+
+    if [ "$?" = 0 ]; then
+            notify-send "$(basename "${0##/*/}")" "Edit successful."
+    else
+            notify-send "$(basename "${0##/*/}")" "Edit failed."; fi
 }
 
 chosen=$(main_list | dmenu ${dmenuOpts}); [ -n "$chosen" ] || exit 1
@@ -275,25 +281,25 @@ case "$chosen" in
                 esac ;;
     logout)     if bw logout; then
                     notify-send \
-                        "$(basename ${0##/*/})" \
+                        "$(basename "${0##/*/}")" \
                         "Logout successful."
                 else
                     notify-send \
-                        "$(basename ${0##/*/})" \
+                        "$(basename "${0##/*/}")" \
                         "Logout failed."
                 fi ;;
     sync)       if bw sync -f; then
                     notify-send \
-                        "$(basename ${0##/*/})" \
+                        "$(basename "${0##/*/}")" \
                         "Sync successful."
                 else
                     notify-send \
-                        "$(basename ${0##/*/})" \
+                        "$(basename "${0##/*/}")" \
                         "Sync failed."
                 fi ;;
     "run Bitwarden Electron") bitwarden ;;
     ${sepStr}*) exit 1 ;;
-    *)          name=$(echo "$chosen" | cut -d '|' -f 1 | tr -d '[:space:]')
+    *)          # name=$(echo "$chosen" | cut -d '|' -f 1 | tr -d '[:space:]')
                 id=$(echo "$chosen" | cut -d '|' -f 2 | tr -d '[:space:]')
                 item=$(bw list items | jq -c ".[] | select(.id == \"$id\")")
                 itemType=$(echo "$item" | jq -r ".type")
@@ -316,23 +322,23 @@ case "$chosen" in
                             done
                             if [ -z "$fail" ]; then
                                 notify-send \
-                                    "$(basename ${0##/*/})" \
+                                    "$(basename "${0##/*/}")" \
                                     "Copy command(s) successful."
                             else
                                 notify-send \
-                                    "$(basename ${0##/*/})" \
+                                    "$(basename "${0##/*/}")" \
                                     "Copy command(s) failed."
                             fi ;;
-                    delete) if bw delete item $id; then
+                    delete) if bw delete item "$id"; then
                                 notify-send \
-                                    "$(basename ${0##/*/})" \
+                                    "$(basename "${0##/*/}")" \
                                     "Deletion successful."
                             else
                                 notify-send \
-                                    "$(basename ${0##/*/})" \
+                                    "$(basename "${0##/*/}")" \
                                     "Deletion failed."
                             fi ;;
-                    edit)   edit_item "$(edit "$item")" $id ;;
+                    edit)   edit_item "$(edit "$item")" "$id" ;;
                 esac ;;
 esac
 
