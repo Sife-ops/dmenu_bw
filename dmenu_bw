@@ -1,6 +1,6 @@
 #!/bin/sh
 
-configHome="${XDG_CONFIG_HOME}/dmenu_bw" #^
+configHome="${XDG_CONFIG_HOME:-${HOME}/.config}/dmenu_bw" #^
 configFile="${configHome}/config.json"
 self=$(basename "${0##/*/}")
 
