@@ -1,6 +1,6 @@
 #!/bin/sh
 
-configHome="${XDG_CONFIG_HOME}/dmenu_bw"
+configHome="${XDG_CONFIG_HOME}/dmenu_bw" #^
 configFile="${configHome}/config.json"
 self=$(basename "${0##/*/}")
 
@@ -33,9 +33,9 @@ if [ -z "$editCmd" ] || [ "$editCmd" = "null" ]; then
 [ "$passwordGenCmd" = "null" ] &&
     unset passwordGenCmd
 [ "$sessionKeyFile" = "null" ] &&
-    unset sessionKeyFile
+    unset sessionKeyFile #$
 
-bwStatus=$(bw status | jq -r '.status')
+bwStatus=$(bw status | jq -r '.status') #^
 case "$bwStatus" in
     unlocked)   : ;;
     *)  case "$bwStatus" in
@@ -73,9 +73,9 @@ case "$bwStatus" in
             *)  notify-send "$self" "Failed to unlock session."
                 exit 1 ;;
         esac ;;
-esac
+esac #$
 
-sepStr="="
+sepStr="=" #^
 sep () {
     i=0
     while [ $i -le 500 ]; do
@@ -106,34 +106,9 @@ create_list () {
     echo "secure note"
     echo "card"
     echo "identity"
-}
+} #$
 
-edit () {
-    # edit a vault item
-    # $1: item json
-    # returns: edited item json
-
-    # create secure temporary files for editing vault items
-    safe="$(mktemp -d /tmp/bw.XXXXX)"
-    chmod 700 "$safe"
-    item="$(mktemp "${safe}/bw.XXXXX.json")"
-    chmod 600 "$item"
-    echo "$1" | jq > "$item"
-
-    # open item with text editor
-    $editCmd "$item"
-
-    # do not accept invalid JSON
-    if ! jq "." "$item" 1>/dev/null 2>&1; then
-        notify-send "$self" "Cannot parse invalid JSON."
-        kill 0
-    fi
-
-    # delete temporary files
-    rm -rf "$safe" 1>/dev/null 2>&1
-}
-
-form () {
+form () { #^
     i=0
     for prop in $(printf "%b" "$1"); do
         i=$(( i + 1 ))
@@ -145,9 +120,9 @@ form () {
             *) item="$(echo "$item" | jq -c "${prop} = \"$fieldVal\"")" ;;
         esac
     done
-}
+} #$
 
-create () {
+create () { #^
     # create a vault item
     # $1: item type
 
@@ -244,23 +219,39 @@ create () {
 
     echo "$item" |
         bw encode |
-        bw create item
-    [ "$?" = 0 ] &&
-        notify-send "$self" "Creation successful." ||
-        notify-send "$self" "Creation failed."
-}
+        bw create item &&
+            notify-send "$self" "Creation successful." ||
+            notify-send "$self" "Creation failed."
+} #$
 
-edit_item () {
+edit () { #^
     # edit a vault item
     # $1: item json
-    # $2: id
-    echo "$1" |
-        bw encode |
-        bw edit item "$2"
-    [ "$?" = 0 ] &&
-            notify-send "$self" "Edit successful." ||
-            notify-send "$self" "Edit failed."
-}
+    # $2: item id
+
+    # create secure temporary files for editing vault items
+    tmpDir="$(mktemp -d /tmp/dmenu_bw.XXXXX)"
+    chmod 700 "$tmpDir"
+    newItem="$(mktemp "${tmpDir}/dmenu_bw.XXXXX.json")"
+    chmod 600 "$newItem"
+    echo "$1" | jq > "$newItem"
+
+    # open item with editor command
+    $editCmd "$newItem"
+
+    # do not accept invalid JSON
+    if ! jq "." "$newItem" 1>/dev/null 2>&1; then
+        notify-send "$self" "Cannot parse invalid JSON."
+        kill 0
+    fi
+
+    bw encode < "$newItem" | bw edit item "$2" &&
+        notify-send "$self" "Edit successful." ||
+        notify-send "$self" "Edit failed."
+
+    # delete temporary files
+    rm -rf "$tmpDir" 1>/dev/null 2>&1
+} #$
 
 chosen=$(main_list | dmenu ${dmenuOpts}); [ -n "$chosen" ] || exit 1
 case "$chosen" in
@@ -271,17 +262,15 @@ case "$chosen" in
                     card)           create card ;;
                     identity)       create identity ;;
                 esac ;;
-    logout)     if bw logout; then
-                    notify-send "$self" "Logout successful."
-                else
-                    notify-send "$self" "Logout failed."; fi ;;
-    sync)       if bw sync -f; then
-                    notify-send "$self" "Sync successful."
-                else
-                    notify-send "$self" "Sync failed."; fi ;;
+    logout)     bw logout &&
+                    notify-send "$self" "Logout successful." ||
+                    notify-send "$self" "Logout failed." ;;
+    sync)       bw sync -f &&
+                    notify-send "$self" "Sync successful." ||
+                    notify-send "$self" "Sync failed." ;;
     "run Bitwarden Electron") bitwarden ;;
     ${sepStr}*) exit 1 ;;
-    *)          # name=$(echo "$chosen" | cut -d '|' -f 1 | tr -d '[:space:]')
+    *)          name=$(echo "$chosen" | cut -d '|' -f 1 | tr -d '[:space:]')
                 id=$(echo "$chosen" | cut -d '|' -f 2 | tr -d '[:space:]')
                 item=$(bw list items | jq -c ".[] | select(.id == \"$id\")")
                 itemType=$(echo "$item" | jq -r ".type")
@@ -299,18 +288,17 @@ case "$chosen" in
                                 value=$(echo "$item" | jq -r "${key}")
                                 cmds=$(echo "$copyCmds" | jq -r ".${itemType}[\"${key}\"][]")
                                 for cmd in "$cmds"; do
-                                    eval "$cmd" || fail=t
+                                    if ! eval "$cmd"; then
+                                        notify-send "$self" "Copy command failed: \"$cmd\""
+                                        fail=t; fi
                                 done
                             done
-                            if [ -z "$fail" ]; then
-                                notify-send "$self" "Copy command(s) successful."
-                            else
-                                notify-send "$self" "Copy command(s) failed."; fi ;;
-                    delete) if bw delete item "$id"; then
-                                notify-send "$self" "Deletion successful."
-                            else
-                                notify-send "$self" "Deletion failed."; fi ;;
-                    edit)   edit_item "$(edit "$item")" "$id" ;;
+                            [ -z "$fail" ] &&
+                                notify-send "$self" "$name copied successfully." ;;
+                    delete) bw delete item "$id" &&
+                                notify-send "$self" "Deletion successful." ||
+                                notify-send "$self" "Deletion failed." ;;
+                    edit)   edit "$item" "$id" ;;
                 esac ;;
 esac
 
