@@ -5,13 +5,14 @@
 A minimal Bitwarden GUI written in POSIX shellscript. <br>
 
 I created dmenu\_bw as a hotkeyed password manager for minimal window manager
-desktop sessions. It is highly inspired by the *workflow* of tiling window
-managers, and allows for the rapid lookup, creation, and editing of Bitwarden
+desktop sessions. It is highly inspired by the mouseless workflow of tiling
+window managers, allowing the rapid lookup, creation, and editing of Bitwarden
 vault items. The goal of dmenu\_bw is to provide the same capabilities as the
 official Bitwarden client but without the Electron dependency. <br>
 
-Features:
-- [x] Fast and light (no electron)!
+Features: <br>
+- [x] Fast 🔥🔥🔥
+- [x] Light (no Electron)! 🪶
 - [x] Copy passwords!
 - [x] Create vault items!
 - [x] Edit vault items!
@@ -58,6 +59,8 @@ Select an item from the main list and select `copy`. See
 Select `create` from the main list. Passwords are automatically generated based
 on the `passwordGenCmd` option. See
 [configuration/passwordGenCmd](#passwordGenCmd).
+![giphy](https://media.giphy.com/media/QJjiAE9AzytpMc2ZLH/giphy.gif) <br>
+*time: 4.33s*
 
 ### Editing Vault Items
 Select an item from the main list and select `edit`. See
@@ -111,7 +114,8 @@ password to primary at the same time. This is so you can paste your username
 and password time without having going back and forth to the password manager.
 <br>
 
-Hint: use sxhkd to paste your primary clipboard with `Super + v`
+Hint: use middle mouse click to paste your primary clipboard, or use sxhkd to
+paste your primary clipboard with `Super + v`
 ```
 mod4+v
     sleep 0.25 &&

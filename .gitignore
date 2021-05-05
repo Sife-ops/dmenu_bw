@@ -1,4 +1,5 @@
 .SRCINFO
+github/
 PKGBUILD
 dmenu_bw.1
 test/
