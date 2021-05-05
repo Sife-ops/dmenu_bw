@@ -83,9 +83,6 @@ used.
 * [editCmd](#editCmd)
 * [sessionKeyFile](#sessionKeyFile)
 
-<!-- An example config file is located in
-/usr/local/share/doc/config.example.json. -->
-
 ### Default Configuration
 ```javascript
 {
@@ -107,8 +104,9 @@ used.
 }
 ```
 Notice that the default behavior is to copy the username to clipboard and
-password to primary at the same time. That is so you can paste both at the same
-time without having going back and forth to the password manager. <br>
+password to primary at the same time. This is so you can paste your username
+and password time without having going back and forth to the password manager.
+<br>
 
 Hint: use sxhkd to paste your primary clipboard with `Super + v`
 ```
@@ -149,9 +147,8 @@ e.g. output identities to a file:
 Options to pass to the dmenu command.
 
 ### editCmd
-Editing vault items with yad is not yet supported. Vault items can be
-edited by passing the JSON file for your Bitwarden vault item to your
-editor command.
+Editing vault items with yad is not yet supported. Vault items can be edited by
+passing the raw JSON item to your editor command.
 
 e.g. edit items with st and nvim
 ```javascript
@@ -179,4 +176,3 @@ Here is a list of missing features that are currently being worked on.
 - [ ] logo
 - [ ] more gifs
 - [ ] password generator dialog or passwordCmd
-

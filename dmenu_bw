@@ -2,6 +2,7 @@
 
 configHome="${XDG_CONFIG_HOME}/dmenu_bw"
 configFile="${configHome}/config.json"
+self=$(basename "${0##/*/}")
 
 if [ -e "$configFile" ]; then
     copyCmds="$(jq -r ".copyCmds" "$configFile")"
@@ -36,9 +37,7 @@ case "$bwStatus" in
     unlocked)   : ;;
     *)  case "$bwStatus" in
             unauthenticated)
-                notify-send \
-                    "$(basename "${0##/*/}")" \
-                    "Unauthenticated session. Acquiring new session key."
+                notify-send "$self" "Unauthenticated session. Acquiring new session key."
                 email=$(yad \
                     --title "Email" \
                     --entry)
@@ -48,17 +47,13 @@ case "$bwStatus" in
                     --hide-text)
                 sessionKey="$(bw login "$email" "$password" --raw)" ;;
             locked)
-                notify-send \
-                    "$(basename "${0##/*/}")" \
-                    "Session locked. Acquiring new session key."
+                notify-send "$self" "Session locked. Acquiring new session key."
                 password=$(yad \
                     --title "Password" \
                     --entry \
                     --hide-text)
                 sessionKey="$(bw unlock "$password" --raw)" ;;
-            *)  notify-send \
-                    "$(basename "${0##/*/}")" \
-                    "Failed to unlock session."
+            *)  notify-send "$self" "Failed to unlock session."
                 kill 0 ;;
         esac
 
@@ -72,9 +67,7 @@ case "$bwStatus" in
         export BW_SESSION=$sessionKey
         case $(bw status | jq -r '.status') in
             unlocked) : ;;
-            *)  notify-send \
-                    "$(basename "${0##/*/}")" \
-                    "Failed to unlock session."
+            *)  notify-send "$self" "Failed to unlock session."
                 kill 0 ;;
         esac ;;
 esac
@@ -129,9 +122,7 @@ edit () {
 
     # do not accept invalid JSON
     if ! jq "." "$item" 1>/dev/null 2>&1; then
-        notify-send \
-            "$(basename "${0##/*/}")" \
-            "Cannot parse invalid JSON."
+        notify-send "$self" "Cannot parse invalid JSON."
         kill 0
     fi
 
@@ -251,9 +242,9 @@ create () {
         bw create item
 
     if [ "$?" = 0 ]; then
-            notify-send "$(basename "${0##/*/}")" "Creation successful."
+            notify-send "$self" "Creation successful."
     else
-            notify-send "$(basename "${0##/*/}")" "Creation failed."; fi
+            notify-send "$self" "Creation failed."; fi
 }
 
 edit_item () {
@@ -265,9 +256,9 @@ edit_item () {
         bw edit item "$2"
 
     if [ "$?" = 0 ]; then
-            notify-send "$(basename "${0##/*/}")" "Edit successful."
+            notify-send "$self" "Edit successful."
     else
-            notify-send "$(basename "${0##/*/}")" "Edit failed."; fi
+            notify-send "$self" "Edit failed."; fi
 }
 
 chosen=$(main_list | dmenu ${dmenuOpts}); [ -n "$chosen" ] || exit 1
@@ -280,23 +271,13 @@ case "$chosen" in
                     identity)       create identity ;;
                 esac ;;
     logout)     if bw logout; then
-                    notify-send \
-                        "$(basename "${0##/*/}")" \
-                        "Logout successful."
+                    notify-send "$self" "Logout successful."
                 else
-                    notify-send \
-                        "$(basename "${0##/*/}")" \
-                        "Logout failed."
-                fi ;;
+                    notify-send "$self" "Logout failed."; fi ;;
     sync)       if bw sync -f; then
-                    notify-send \
-                        "$(basename "${0##/*/}")" \
-                        "Sync successful."
+                    notify-send "$self" "Sync successful."
                 else
-                    notify-send \
-                        "$(basename "${0##/*/}")" \
-                        "Sync failed."
-                fi ;;
+                    notify-send "$self" "Sync failed."; fi ;;
     "run Bitwarden Electron") bitwarden ;;
     ${sepStr}*) exit 1 ;;
     *)          # name=$(echo "$chosen" | cut -d '|' -f 1 | tr -d '[:space:]')
@@ -321,23 +302,13 @@ case "$chosen" in
                                 done
                             done
                             if [ -z "$fail" ]; then
-                                notify-send \
-                                    "$(basename "${0##/*/}")" \
-                                    "Copy command(s) successful."
+                                notify-send "$self" "Copy command(s) successful."
                             else
-                                notify-send \
-                                    "$(basename "${0##/*/}")" \
-                                    "Copy command(s) failed."
-                            fi ;;
+                                notify-send "$self" "Copy command(s) failed."; fi ;;
                     delete) if bw delete item "$id"; then
-                                notify-send \
-                                    "$(basename "${0##/*/}")" \
-                                    "Deletion successful."
+                                notify-send "$self" "Deletion successful."
                             else
-                                notify-send \
-                                    "$(basename "${0##/*/}")" \
-                                    "Deletion failed."
-                            fi ;;
+                                notify-send "$self" "Deletion failed."; fi ;;
                     edit)   edit_item "$(edit "$item")" "$id" ;;
                 esac ;;
 esac
