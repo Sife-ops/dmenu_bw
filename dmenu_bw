@@ -8,6 +8,7 @@ if [ -e "$configFile" ]; then
     copyCmds="$(jq -r ".copyCmds" "$configFile")"
     dmenuOpts="$(jq -r ".dmenuOpts" "$configFile")"
     editCmd="$(jq -r ".editCmd" "$configFile")"
+    passwordGenCmd="$(jq -r ".passwordGenCmd" "$configFile")"
     sessionKeyFile="$(jq -r ".sessionKeyFile" "$configFile")"; fi
 
 if [ -z "$copyCmds" ] || [ "$copyCmds" = "null" ]; then
@@ -25,12 +26,14 @@ if [ -z "$copyCmds" ] || [ "$copyCmds" = "null" ]; then
         "card": {},
         "identity": {}
     }'; fi
-if [ -z "$dmenuOpts" ] || [ "$dmenuOpts" = "null" ]; then
-    dmenuOpts="-i -l 10"; fi
-if [ -z "$editCmd" ] || [ "$editCmd" = "null" ]; then
-    editCmd="xterm -e nano"; fi
-if [ "$sessionKeyFile" = "null" ]; then
-    unset sessionKeyFile; fi
+[ -z "$dmenuOpts" ] || [ "$dmenuOpts" = "null" ] &&
+    dmenuOpts="-i -l 10"
+[ -z "$editCmd" ] || [ "$editCmd" = "null" ] &&
+    editCmd="xterm -e nano"
+[ "$passwordGenCmd" = "null" ] &&
+    unset passwordGenCmd
+[ "$sessionKeyFile" = "null" ] &&
+    unset sessionKeyFile
 
 bwStatus=$(bw status | jq -r '.status')
 case "$bwStatus" in
@@ -160,10 +163,13 @@ create () {
             uri="$(bw get template item.login.uri)"
             item="$(echo "$item" | jq -c ".login.uris = [${uri}]")"
 
+            [ -n "$passwordGenCmd" ] &&
+                password=$(eval "$passwordGenCmd")
+
             form="$(yad --form \
                 --field=$"Name" "" \
                 --field=$"Username" "" \
-                --field=$"Password":H "" \
+                --field=$"Password":H "${password:-""}" \
                 --field=$"URI" "" \
                 --field=$"Folder" "" \
                 --field=$"Favorite":CHK "false" \

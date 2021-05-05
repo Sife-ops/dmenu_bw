@@ -55,7 +55,8 @@ Select an item from the main list and select `copy`. See
 [configuration/copyCmds](#copyCmds).
 
 ### Creating Vault Items
-Select `create` from the main list.
+Select `create` from the main list. Passwords are automatically generated using
+a custom command. See [configuration/passwordGenCmd](#passwordGenCmd).
 
 ### Editing Vault Items
 Select an item from the main list and select `edit`. See
@@ -81,6 +82,7 @@ used.
 * [copyCmds](#copyCmds)
 * [dmenuOpts](#dmenuOpts)
 * [editCmd](#editCmd)
+* [passwordGenCmd](#passwordGenCmd)
 * [sessionKeyFile](#sessionKeyFile)
 
 ### Default Configuration
@@ -153,6 +155,14 @@ passing the raw JSON item to your editor command.
 e.g. edit items with st and nvim
 ```javascript
 "editCmd": "st -e nvim"
+```
+
+### passwordGenCmd
+The command for automatically generating new login passwords.
+
+e.g. generate a random 16-character password
+```javascript
+"passwordGenCmd":"tr -dc 'a-zA-Z0-9!@#$%^&*()-=_+[]~{}|;:,./<>?' < /dev/urandom | head -c 16",
 ```
 
 ### sessionKeyFile
