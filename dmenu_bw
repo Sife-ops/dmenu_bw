@@ -238,8 +238,9 @@ edit () { #^
     echo "$1" | jq > "$newItem"
 
     # open item with editor command
-    if ! $editCmd "$newItem"; then
-        notify-send "$self" "Failed to run ${editCmd}."
+    $editCmd "$newItem"
+    if [ ! "$?" = 0 ]; then
+        notify-send "$self" "Cannot run $editCmd."
         kill 0
     fi
 
