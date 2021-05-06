@@ -5,11 +5,11 @@ configFile="${configHome}/config.json"
 self=$(basename "${0##/*/}")
 
 if [ -e "$configFile" ]; then
-    copyCmds="$(jq -r ".copyCmds" "$configFile")"
-    dmenuOpts="$(jq -r ".dmenuOpts" "$configFile")"
-    editCmd="$(jq -r ".editCmd" "$configFile")"
-    passwordGenCmd="$(jq -r ".passwordGenCmd" "$configFile")"
-    sessionKeyFile="$(jq -r ".sessionKeyFile" "$configFile")"; fi
+    copyCmds=$(jq -r ".copyCmds" "$configFile")
+    dmenuOpts=$(jq -r ".dmenuOpts" "$configFile")
+    editCmd=$(jq -r ".editCmd" "$configFile")
+    passwordGenCmd=$(jq -r ".passwordGenCmd" "$configFile")
+    sessionKeyFile=$(jq -r ".sessionKeyFile" "$configFile"); fi
 
 if [ -z "$copyCmds" ] || [ "$copyCmds" = "null" ]; then
     copyCmds='
@@ -48,14 +48,14 @@ case "$bwStatus" in
                     --title "Password" \
                     --entry \
                     --hide-text)
-                sessionKey="$(bw login "$email" "$password" --raw)" ;;
+                sessionKey=$(bw login "$email" "$password" --raw) ;;
             locked)
                 notify-send "$self" "Session locked. Acquiring new session key."
                 password=$(yad \
                     --title "Password" \
                     --entry \
                     --hide-text)
-                sessionKey="$(bw unlock "$password" --raw)" ;;
+                sessionKey=$(bw unlock "$password" --raw) ;;
             *)  notify-send "$self" "Failed to unlock session."
                 exit 1 ;;
         esac
@@ -112,12 +112,12 @@ form () { #^
     i=0
     for prop in $(printf "%b" "$1"); do
         i=$(( i + 1 ))
-        fieldVal="$(echo "$form" | awk -F "$formSep" "{print \$${i}}")"
+        fieldVal=$(echo "$form" | awk -F "$formSep" "{print \$${i}}")
         case "$fieldVal" in
-            "")     newItem="$(echo "$newItem" | jq -c "${prop} = null")" ;;
-            TRUE)   newItem="$(echo "$newItem" | jq -c "${prop} = true")" ;;
-            FALSE)  newItem="$(echo "$newItem" | jq -c "${prop} = false")" ;;
-            *)      newItem="$(echo "$newItem" | jq -c "${prop} = \"$fieldVal\"")" ;;
+            "")     newItem=$(echo "$newItem" | jq -c "${prop} = null") ;;
+            TRUE)   newItem=$(echo "$newItem" | jq -c "${prop} = true") ;;
+            FALSE)  newItem=$(echo "$newItem" | jq -c "${prop} = false") ;;
+            *)      newItem=$(echo "$newItem" | jq -c "${prop} = \"$fieldVal\"") ;;
         esac
     done
 } #$
@@ -126,21 +126,21 @@ create () { #^
     # create a vault item
     # $1: item type
 
-    newItem="$(bw get template item)"
-    template="$(bw get template item."${1}")" # securenote vs. secureNote
-    newItem="$(echo "$newItem" | jq -c ".${1} = ${template}")"
+    newItem=$(bw get template item)
+    template=$(bw get template item."${1}") # securenote vs. secureNote
+    newItem=$(echo "$newItem" | jq -c ".${1} = ${template}")
 
-    formSep="$(tr -dc '[:digit:]' < /dev/urandom | head -c 5)"
+    formSep=$(tr -dc '[:digit:]' < /dev/urandom | head -c 5)
     case "$1" in
 
         login) #^
-            uri="$(bw get template item.login.uri)"
-            newItem="$(echo "$newItem" | jq -c ".login.uris = [${uri}]")"
+            uri=$(bw get template item.login.uri)
+            newItem=$(echo "$newItem" | jq -c ".login.uris = [${uri}]")
 
             [ -n "$passwordGenCmd" ] &&
                 password=$(eval "$passwordGenCmd")
 
-            form="$(yad --form \
+            form=$(yad --form \
                 --field=$"Name" "" \
                 --field=$"Username" "" \
                 --field=$"Password":H "${password:-""}" \
@@ -148,28 +148,28 @@ create () { #^
                 --field=$"Folder" "" \
                 --field=$"Favorite":CHK "false" \
                 --field=$"Notes":TXT "" \
-                --separator="$formSep" || kill 0)"
+                --separator="$formSep" || kill 0)
 
             form ".name\n.login.username\n.login.password\n.login.uris[0].uri\n.folderId\n.favorite\n.notes"
             ;; #$
 
         secureNote) #^
-            newItem="$(echo "$newItem" | jq -c '.type = 2')"
+            newItem=$(echo "$newItem" | jq -c '.type = 2')
 
-            form="$(yad --form \
+            form=$(yad --form \
                 --field=$"Name" "" \
                 --field=$"Folder" "" \
                 --field=$"Favorite":CHK "false" \
                 --field=$"Notes":TXT "" \
-                --separator="$formSep" || kill 0)"
+                --separator="$formSep" || kill 0)
 
             form ".name\n.folderId\n.favorite\n.notes"
             ;; #$
 
         card) #^
-            newItem="$(echo "$newItem" | jq -c '.type = 3')"
+            newItem=$(echo "$newItem" | jq -c '.type = 3')
 
-            form="$(yad --form \
+            form=$(yad --form \
                 --field=$"Name" "" \
                 --field=$"Cardholder Name" "" \
                 --field=$"Number":H "" \
@@ -180,15 +180,15 @@ create () { #^
                 --field=$"Folder" "" \
                 --field=$"Favorite":CHK "false" \
                 --field=$"Notes":TXT "" \
-                --separator="$formSep" || kill 0)"
+                --separator="$formSep" || kill 0)
 
             form ".name\n.card.cardholderName\n.card.number\n.card.brand\n.card.expMonth\n.card.expYear\n.card.code\n.folderId\n.favorite\n.notes"
             ;; #$
 
         identity) #^
-            newItem="$(echo "$newItem" | jq -c '.type = 4')"
+            newItem=$(echo "$newItem" | jq -c '.type = 4')
 
-            form="$(yad --form \
+            form=$(yad --form \
                 --field=$"Name" "" \
                 --field=$"Title":CB "Mr!Mrs!Ms!Dr" \
                 --field=$"First Name" "" \
@@ -210,7 +210,7 @@ create () { #^
                 --field=$"Favorite":CHK "false" \
                 --field=$"Folder" "" \
                 --field=$"Notes":TXT "" \
-                --separator="$formSep" || kill 0)"
+                --separator="$formSep" || kill 0)
 
             form ".name\n.identity.title\n.identity.firstName\n.identity.middleName\n.identity.lastName\n.identity.username\n.identity.company\n.identity.ssn\n.identity.passportNumber\n.identity.licenseNumber\n.identity.email\n.identity.address1\n.identity.address2\n.identity.address3\n.identity.city\n.identity.state\n.identity.postalCode\n.identity.country\n.favorite\n.folder\n.notes"
             ;; #$
@@ -231,9 +231,9 @@ edit () { #^
     # $2: item id
 
     # create secure temporary files for editing vault items
-    tmpDir="$(mktemp -d /tmp/dmenu_bw.XXXXX)"
+    tmpDir=$(mktemp -d /tmp/dmenu_bw.XXXXX)
     chmod 700 "$tmpDir"
-    newItem="$(mktemp "${tmpDir}/dmenu_bw.XXXXX.json")"
+    newItem=$(mktemp "${tmpDir}/dmenu_bw.XXXXX.json")
     chmod 600 "$newItem"
     echo "$1" | jq > "$newItem"
 
