@@ -114,10 +114,10 @@ form () { #^
         i=$(( i + 1 ))
         fieldVal="$(echo "$form" | awk -F "$formSep" "{print \$${i}}")"
         case "$fieldVal" in
-            "") newItem="$(echo "$newItem" | jq -c "${prop} = null")" ;;
-            TRUE) newItem="$(echo "$newItem" | jq -c "${prop} = true")" ;;
-            FALSE) newItem="$(echo "$newItem" | jq -c "${prop} = false")" ;;
-            *) newItem="$(echo "$newItem" | jq -c "${prop} = \"$fieldVal\"")" ;;
+            "")     newItem="$(echo "$newItem" | jq -c "${prop} = null")" ;;
+            TRUE)   newItem="$(echo "$newItem" | jq -c "${prop} = true")" ;;
+            FALSE)  newItem="$(echo "$newItem" | jq -c "${prop} = false")" ;;
+            *)      newItem="$(echo "$newItem" | jq -c "${prop} = \"$fieldVal\"")" ;;
         esac
     done
 } #$
