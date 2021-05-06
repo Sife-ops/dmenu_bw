@@ -43,8 +43,8 @@ case "$bwStatus" in
                 notify-send "$self" "Unauthenticated session. Acquiring new session key."
                 formSep=$(tr -dc '[:digit:]' < /dev/urandom | head -c 5)
                 login=$(yad --form \
-                    --field=$"Email" "" \
-                    --field=$"Password":H "" \
+                    --field="Email" "" \
+                    --field="Password":H "" \
                     --separator="$formSep" || kill 0)
                 email=$(echo "$login" | awk -F "$formSep" '{print $1}')
                 password=$(echo "$login" | awk -F "$formSep" '{print $2}')
@@ -127,7 +127,7 @@ create () { #^
     # $1: item type
 
     newItem=$(bw get template item)
-    template=$(bw get template item."${1}") # securenote vs. secureNote
+    template=$(bw get template item."${1}")
     newItem=$(echo "$newItem" | jq -c ".${1} = ${template}")
 
     formSep=$(tr -dc '[:digit:]' < /dev/urandom | head -c 5)
@@ -141,13 +141,13 @@ create () { #^
                 password=$(eval "$passwordGenCmd")
 
             form=$(yad --form \
-                --field=$"Name" "" \
-                --field=$"Username" "" \
-                --field=$"Password":H "${password:-""}" \
-                --field=$"URI" "" \
-                --field=$"Folder" "" \
-                --field=$"Favorite":CHK "false" \
-                --field=$"Notes":TXT "" \
+                --field="Name" "" \
+                --field="Username" "" \
+                --field="Password":H "${password:-""}" \
+                --field="URI" "" \
+                --field="Folder" "" \
+                --field="Favorite":CHK "false" \
+                --field="Notes":TXT "" \
                 --separator="$formSep" || kill 0)
 
             form ".name\n.login.username\n.login.password\n.login.uris[0].uri\n.folderId\n.favorite\n.notes"
@@ -157,10 +157,10 @@ create () { #^
             newItem=$(echo "$newItem" | jq -c '.type = 2')
 
             form=$(yad --form \
-                --field=$"Name" "" \
-                --field=$"Folder" "" \
-                --field=$"Favorite":CHK "false" \
-                --field=$"Notes":TXT "" \
+                --field="Name" "" \
+                --field="Folder" "" \
+                --field="Favorite":CHK "false" \
+                --field="Notes":TXT "" \
                 --separator="$formSep" || kill 0)
 
             form ".name\n.folderId\n.favorite\n.notes"
@@ -170,16 +170,16 @@ create () { #^
             newItem=$(echo "$newItem" | jq -c '.type = 3')
 
             form=$(yad --form \
-                --field=$"Name" "" \
-                --field=$"Cardholder Name" "" \
-                --field=$"Number":H "" \
-                --field=$"Brand":CBE "Visa!Mastercard!American Express!Discover!Diners Club!JCB!Maestro!UnionPay" \
-                --field=$"Expiration Month":NUM "!1..12" \
-                --field=$"Expiration Year":NUM "!1900..9999" \
-                --field=$"Security Code":NUM "!100..999" \
-                --field=$"Folder" "" \
-                --field=$"Favorite":CHK "false" \
-                --field=$"Notes":TXT "" \
+                --field="Name" "" \
+                --field="Cardholder Name" "" \
+                --field="Number":H "" \
+                --field="Brand":CBE "Visa!Mastercard!American Express!Discover!Diners Club!JCB!Maestro!UnionPay" \
+                --field="Expiration Month":NUM "!1..12" \
+                --field="Expiration Year":NUM "!1900..9999" \
+                --field="Security Code":NUM "!100..999" \
+                --field="Folder" "" \
+                --field="Favorite":CHK "false" \
+                --field="Notes":TXT "" \
                 --separator="$formSep" || kill 0)
 
             form ".name\n.card.cardholderName\n.card.number\n.card.brand\n.card.expMonth\n.card.expYear\n.card.code\n.folderId\n.favorite\n.notes"
@@ -189,27 +189,27 @@ create () { #^
             newItem=$(echo "$newItem" | jq -c '.type = 4')
 
             form=$(yad --form \
-                --field=$"Name" "" \
-                --field=$"Title":CB "Mr!Mrs!Ms!Dr" \
-                --field=$"First Name" "" \
-                --field=$"Middle Name" "" \
-                --field=$"Last Name" "" \
-                --field=$"Username" "" \
-                --field=$"Company" "" \
-                --field=$"Social Security Number" "" \
-                --field=$"Passport Number" "" \
-                --field=$"License Number" "" \
-                --field=$"Email" "" \
-                --field=$"Address 1" "" \
-                --field=$"Address 2" "" \
-                --field=$"Address 3" "" \
-                --field=$"City/Town" "" \
-                --field=$"State/Province" "" \
-                --field=$"Zip/Postal Code" "" \
-                --field=$"Country" "" \
-                --field=$"Favorite":CHK "false" \
-                --field=$"Folder" "" \
-                --field=$"Notes":TXT "" \
+                --field="Name" "" \
+                --field="Title":CB "Mr!Mrs!Ms!Dr" \
+                --field="First Name" "" \
+                --field="Middle Name" "" \
+                --field="Last Name" "" \
+                --field="Username" "" \
+                --field="Company" "" \
+                --field="Social Security Number" "" \
+                --field="Passport Number" "" \
+                --field="License Number" "" \
+                --field="Email" "" \
+                --field="Address 1" "" \
+                --field="Address 2" "" \
+                --field="Address 3" "" \
+                --field="City/Town" "" \
+                --field="State/Province" "" \
+                --field="Zip/Postal Code" "" \
+                --field="Country" "" \
+                --field="Favorite":CHK "false" \
+                --field="Folder" "" \
+                --field="Notes":TXT "" \
                 --separator="$formSep" || kill 0)
 
             form ".name\n.identity.title\n.identity.firstName\n.identity.middleName\n.identity.lastName\n.identity.username\n.identity.company\n.identity.ssn\n.identity.passportNumber\n.identity.licenseNumber\n.identity.email\n.identity.address1\n.identity.address2\n.identity.address3\n.identity.city\n.identity.state\n.identity.postalCode\n.identity.country\n.favorite\n.folder\n.notes"
