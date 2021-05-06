@@ -200,4 +200,3 @@ Here is a list of missing features that are currently being worked on.
 - [ ] custom fields
 - [ ] editing vault items with yad
 - [ ] logo
-- [ ] more gifs
