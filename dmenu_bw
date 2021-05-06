@@ -238,7 +238,10 @@ edit () { #^
     echo "$1" | jq > "$newItem"
 
     # open item with editor command
-    $editCmd "$newItem"
+    if ! $editCmd "$newItem"; then
+        notify-send "$self" "Failed to run ${editCmd}."
+        kill 0
+    fi
 
     # do not accept invalid JSON
     if ! jq "." "$newItem" 1>/dev/null 2>&1; then
