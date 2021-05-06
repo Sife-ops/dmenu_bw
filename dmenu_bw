@@ -41,13 +41,13 @@ case "$bwStatus" in
     *)  case "$bwStatus" in
             unauthenticated)
                 notify-send "$self" "Unauthenticated session. Acquiring new session key."
-                email=$(yad \
-                    --title "Email" \
-                    --entry)
-                password=$(yad \
-                    --title "Password" \
-                    --entry \
-                    --hide-text)
+                formSep=$(tr -dc '[:digit:]' < /dev/urandom | head -c 5)
+                login=$(yad --form \
+                    --field=$"Email" "" \
+                    --field=$"Password":H "" \
+                    --separator="$formSep" || kill 0)
+                email=$(echo "$login" | awk -F "$formSep" '{print $1}')
+                password=$(echo "$login" | awk -F "$formSep" '{print $2}')
                 sessionKey=$(bw login "$email" "$password" --raw) ;;
             locked)
                 notify-send "$self" "Session locked. Acquiring new session key."
