@@ -41,14 +41,15 @@ case "$bwStatus" in
     *)  case "$bwStatus" in
             unauthenticated)
                 notify-send "$self" "Unauthenticated session. Acquiring new session key."
-                formSep=$(tr -dc '[:digit:]' < /dev/urandom | head -c 5)
                 login=$(yad --form \
                     --field="Email" "" \
                     --field="Password":H "" \
-                    --separator="$formSep" || kill 0)
-                email=$(echo "$login" | awk -F "$formSep" '{print $1}')
-                password=$(echo "$login" | awk -F "$formSep" '{print $2}')
-                sessionKey=$(bw login "$email" "$password" --raw) ;;
+                    --separator="\n" |
+                        grep -v "^$")
+                sessionKey=$(bw login \
+                    $(echo "$login" | sed -n "1p") \
+                    $(echo "$login" | sed -n "2p") \
+                    --raw) ;;
             locked)
                 notify-send "$self" "Session locked. Acquiring new session key."
                 password=$(yad \
@@ -108,21 +109,26 @@ create_list () {
     echo "identity"
 } #$
 
-form () { #^
+createHelper () { #^
+    # create helper
+    # $1: props
+    # $2: form
     i=0
-    for prop in $(printf "%b" "$1"); do
-        i=$(( i + 1 ))
-        fieldVal=$(echo "$form" | awk -F "$formSep" "{print \$${i}}")
-        case "$fieldVal" in
+    n=$(echo "$props" | awk '{print NF}')
+    while [ $i -lt $n ]; do
+        i=$((i + 1))
+        prop=$(printf "%s" "$1" | awk "{print \$${i}}")
+        value=$(printf "%s" "$2" | sed -n "${i}p")
+        case "$value" in
             "")     newItem=$(echo "$newItem" | jq -c "${prop} = null") ;;
             TRUE)   newItem=$(echo "$newItem" | jq -c "${prop} = true") ;;
             FALSE)  newItem=$(echo "$newItem" | jq -c "${prop} = false") ;;
-            *)      newItem=$(echo "$newItem" | jq -c "${prop} = \"$fieldVal\"") ;;
+            *)      newItem=$(echo "$newItem" | jq -c "${prop} = \"$value\"") ;;
         esac
     done
-} #$
+}
 
-create () { #^
+create () {
     # create a vault item
     # $1: item type
 
@@ -130,16 +136,13 @@ create () { #^
     template=$(bw get template item."${1}")
     newItem=$(echo "$newItem" | jq -c ".${1} = ${template}")
 
-    formSep=$(tr -dc '[:digit:]' < /dev/urandom | head -c 5)
     case "$1" in
-
         login) #^
             uri=$(bw get template item.login.uri)
-            newItem=$(echo "$newItem" | jq -c ".login.uris = [${uri}]")
-
             [ -n "$passwordGenCmd" ] &&
                 password=$(eval "$passwordGenCmd")
-
+            newItem=$(echo "$newItem" | jq -c ".login.uris = [${uri}]")
+            props=".name .login.username .login.password .login.uris[0].uri .folderId .favorite .notes"
             form=$(yad --form \
                 --field="Name" "" \
                 --field="Username" "" \
@@ -148,27 +151,25 @@ create () { #^
                 --field="Folder" "" \
                 --field="Favorite":CHK "false" \
                 --field="Notes":TXT "" \
-                --separator="$formSep" || kill 0)
-
-            form ".name\n.login.username\n.login.password\n.login.uris[0].uri\n.folderId\n.favorite\n.notes"
+                --separator="\n")
+            createHelper "$props" "$form"
             ;; #$
 
         secureNote) #^
-            newItem=$(echo "$newItem" | jq -c '.type = 2')
-
+            newItem=$(echo "$newItem" | jq -c ".type = 2")
+            props=".name .folderId .favorite .notes"
             form=$(yad --form \
                 --field="Name" "" \
                 --field="Folder" "" \
                 --field="Favorite":CHK "false" \
                 --field="Notes":TXT "" \
-                --separator="$formSep" || kill 0)
-
-            form ".name\n.folderId\n.favorite\n.notes"
+                --separator="\n")
+            createHelper "$props" "$form"
             ;; #$
 
         card) #^
             newItem=$(echo "$newItem" | jq -c '.type = 3')
-
+            props=".name .card.cardholderName .card.number .card.brand .card.expMonth .card.expYear .card.code .folderId .favorite .notes"
             form=$(yad --form \
                 --field="Name" "" \
                 --field="Cardholder Name" "" \
@@ -180,14 +181,13 @@ create () { #^
                 --field="Folder" "" \
                 --field="Favorite":CHK "false" \
                 --field="Notes":TXT "" \
-                --separator="$formSep" || kill 0)
-
-            form ".name\n.card.cardholderName\n.card.number\n.card.brand\n.card.expMonth\n.card.expYear\n.card.code\n.folderId\n.favorite\n.notes"
+                --separator="\n")
+            createHelper "$props" "$form"
             ;; #$
 
         identity) #^
             newItem=$(echo "$newItem" | jq -c '.type = 4')
-
+            props=".name .identity.title .identity.firstName .identity.middleName .identity.lastName .identity.username .identity.company .identity.ssn .identity.passportNumber .identity.licenseNumber .identity.email .identity.address1 .identity.address2 .identity.address3 .identity.city .identity.state .identity.postalCode .identity.country .favorite .folder .notes"
             form=$(yad --form \
                 --field="Name" "" \
                 --field="Title":CB "Mr!Mrs!Ms!Dr" \
@@ -210,9 +210,8 @@ create () { #^
                 --field="Favorite":CHK "false" \
                 --field="Folder" "" \
                 --field="Notes":TXT "" \
-                --separator="$formSep" || kill 0)
-
-            form ".name\n.identity.title\n.identity.firstName\n.identity.middleName\n.identity.lastName\n.identity.username\n.identity.company\n.identity.ssn\n.identity.passportNumber\n.identity.licenseNumber\n.identity.email\n.identity.address1\n.identity.address2\n.identity.address3\n.identity.city\n.identity.state\n.identity.postalCode\n.identity.country\n.favorite\n.folder\n.notes"
+                --separator="\n")
+            createHelper "$props" "$form"
             ;; #$
 
         *) kill 0 ;;
