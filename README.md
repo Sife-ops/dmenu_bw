@@ -185,7 +185,7 @@ config.json:
 ```javascript
 "sessionKeyFile": "/home/foo/.cache/bwsession"
 ```
-.bashrc
+.bashrc/.zshrc:
 ```bash
 source /home/foo/.cache/bwsession
 ```
