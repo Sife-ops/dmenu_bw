@@ -40,7 +40,7 @@ case "$bwStatus" in
     unlocked)   : ;;
     *)  case "$bwStatus" in
             unauthenticated)
-                notify-send "$self" "Unauthenticated session. Acquiring new session key."
+                notify-send "$self" "Unauthenticated session. Acquiring new session key." &
                 login=$(yad --form \
                     --field="Email" "" \
                     --field="Password":H "" \
@@ -51,13 +51,13 @@ case "$bwStatus" in
                     $(echo "$login" | sed -n "2p") \
                     --raw) ;;
             locked)
-                notify-send "$self" "Session locked. Acquiring new session key."
+                notify-send "$self" "Session locked. Acquiring new session key." &
                 password=$(yad \
                     --title "Password" \
                     --entry \
                     --hide-text)
                 sessionKey=$(bw unlock "$password" --raw) ;;
-            *)  notify-send "$self" "Failed to unlock session."
+            *)  notify-send "$self" "Failed to unlock session." &
                 exit 1 ;;
         esac
 
@@ -71,7 +71,7 @@ case "$bwStatus" in
         export BW_SESSION=$sessionKey
         case $(bw status | jq -r '.status') in
             unlocked) : ;;
-            *)  notify-send "$self" "Failed to unlock session."
+            *)  notify-send "$self" "Failed to unlock session." &
                 exit 1 ;;
         esac ;;
 esac #$
@@ -221,7 +221,7 @@ create () {
         bw encode |
         bw create item &&
             notify-send "$self" "Creation successful." ||
-            notify-send "$self" "Creation failed."
+            notify-send "$self" "Creation failed." &
 } #$
 
 edit () { #^
@@ -238,19 +238,19 @@ edit () { #^
 
     # open item with editor command
     if ! $editCmd "$newItem"; then
-        notify-send "$self" "Failed to run ${editCmd}."
+        notify-send "$self" "Failed to run ${editCmd}." &
         kill 0
     fi
 
     # do not accept invalid JSON
     if ! jq "." "$newItem" 1>/dev/null 2>&1; then
-        notify-send "$self" "Cannot parse invalid JSON."
+        notify-send "$self" "Cannot parse invalid JSON." &
         kill 0
     fi
 
     bw encode < "$newItem" | bw edit item "$2" &&
         notify-send "$self" "Edit successful." ||
-        notify-send "$self" "Edit failed."
+        notify-send "$self" "Edit failed." &
 
     # delete temporary files
     rm -rf "$tmpDir" 1>/dev/null 2>&1
@@ -267,10 +267,10 @@ case "$chosen" in
                 esac ;;
     logout)     bw logout &&
                     notify-send "$self" "Logout successful." ||
-                    notify-send "$self" "Logout failed." ;;
+                    notify-send "$self" "Logout failed." & ;;
     sync)       bw sync -f &&
                     notify-send "$self" "Sync successful." ||
-                    notify-send "$self" "Sync failed." ;;
+                    notify-send "$self" "Sync failed." & ;;
     "run Bitwarden Electron") bitwarden ;;
     ${sepStr}*) exit 1 ;;
     *)          name=$(echo "$chosen" | cut -d '|' -f 1 | tr -d '[:space:]') # use awk
@@ -292,15 +292,15 @@ case "$chosen" in
                                 cmds=$(echo "$copyCmds" | jq -r "${itemType}[\"${key}\"][]")
                                 for cmd in "$cmds"; do
                                     if ! eval "$cmd"; then
-                                        notify-send "$self" "Copy command failed: \"$cmd\""
+                                        notify-send "$self" "Copy command failed: \"$cmd\"" &
                                         fail=t; fi
                                 done
                             done
                             [ -z "$fail" ] &&
-                                notify-send "$self" "$name copied successfully." ;;
+                                notify-send "$self" "$name copied successfully." & ;;
                     delete) bw delete item "$id" &&
                                 notify-send "$self" "Deletion successful." ||
-                                notify-send "$self" "Deletion failed." ;;
+                                notify-send "$self" "Deletion failed." & ;;
                     edit)   edit "$item" "$id" ;;
                 esac ;;
 esac
