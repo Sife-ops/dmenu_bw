@@ -91,7 +91,7 @@ main_list () {
     echo "logout"
     echo "sync"
     sep
-    bw list items | jq -r '.[] | "\(.name) | \(.id)"'
+    bw list items | jq -r '.[] | "\(.name) | \(.login.username) | \(.id)"'
     sep
     echo "run Bitwarden Electron"
 }
